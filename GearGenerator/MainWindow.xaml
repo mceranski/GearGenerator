@@ -1,0 +1,48 @@
+﻿<Window x:Class="GearGenerator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d"
+        Title="Gear Generator" Height="700" Width="700">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Canvas x:Name="Canvas" 
+                        Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}"
+                        Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}">
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleY="{Binding ElementName=Slider, Path=Value}" ScaleX="{Binding ElementName=Slider, Path=Value}"/>
+                </Canvas.RenderTransform>
+                </Canvas>
+            </Grid>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Slider x:Name="Slider"
+                    Maximum="5" 
+                    Minimum=".25" 
+                    Value="1"
+                    Foreground="Black"
+                    IsSnapToTickEnabled="True"
+                    TickPlacement="BottomRight"
+                    Ticks=".25, .5, .75, 1, 2, 3, 4, 5" />
+
+            <TextBlock Grid.Column="2" Text="{Binding ElementName=Slider, Path=Value, StringFormat={}{0:P0}}"/>
+        </Grid>
+    </Grid>
+</Window>
