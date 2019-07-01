@@ -72,14 +72,17 @@ namespace GearGenerator
             var involutePts = GetInvolutePoints(startAngle);
             var curve = DrawCurve(involutePts);
 
+            
             //find where the involute point intersects with the pitch circle
-            var intersection = GetIntersectionPoints(curve.Data, _pitchCircle.Data).FirstOrDefault();
+            var intersection = GetIntersectionPoints(curve, _pitchCircle).FirstOrDefault();
             DrawCircle(intersection, 1, Brushes.Red);
             DrawLine(CenterPoint, intersection, Brushes.Red);
 
             var xDiff = intersection.X - CenterPoint.X;
             var yDiff = intersection.Y - CenterPoint.Y;
             var intersectAngle = Math.Atan2(yDiff, xDiff) * 180d / Math.PI;
+
+            var delta = startAngle - intersectAngle;
 
             var offset1Degrees = intersectAngle - (ToothSpacingDegrees * .25);
             var offset1 = DegreesToRadians(offset1Degrees);
@@ -96,8 +99,8 @@ namespace GearGenerator
             DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
 
-            var mirrorPts = GetInvolutePoints(offset2Degrees, true);
-
+            var mirrorPts = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
+            DrawCircle(mirrorPoint2, 1, Brushes.Red);
             DrawCurve(mirrorPts);
         }
 
@@ -146,10 +149,10 @@ namespace GearGenerator
             return new Point(a.X + vectorX, a.Y + vectorY);
         }
 
-        static Point[] GetIntersectionPoints(Geometry g1, Geometry g2)
+        static Point[] GetIntersectionPoints(Path g1, Path g2)
         {
-            Geometry og1 = g1.GetWidenedPathGeometry(new Pen(Brushes.Black, 1));
-            Geometry og2 = g2.GetWidenedPathGeometry(new Pen(Brushes.Black, 1));
+            Geometry og1 = g1.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g1.StrokeThickness));
+            Geometry og2 = g2.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g2.StrokeThickness));
             var cg = new CombinedGeometry(GeometryCombineMode.Intersect, og1, og2);
             var pg = cg.GetFlattenedPathGeometry();
             var result = new Point[pg.Figures.Count];

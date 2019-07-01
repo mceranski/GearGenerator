@@ -1,10 +1,6 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using GearGenerator.Annotations;
 
 namespace GearGenerator
 {
@@ -34,7 +30,7 @@ namespace GearGenerator
         void Test()
         {
             DrawGrid();
-            var gear = new Gear {Teeth = 8, PitchDiameter = 200, DiametralPitch = .04, PressureAngle = 27 };
+            var gear = new Gear {Teeth = 8, PitchDiameter = 200, DiametralPitch =.04, PressureAngle = 27 };
             var vm = new Gear2dViewModel( gear, Canvas );
             this.DataContext = vm;
             //vm.Draw();
