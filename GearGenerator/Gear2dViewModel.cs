@@ -31,7 +31,7 @@ namespace GearGenerator
             Draw();
         }
 
-        void DrawPieSlices()
+        private void DrawPieSlices()
         {
             //draw the lines that represent equal divisions of the circle based on the number of teeth;
             for (var i = 1; i <= Teeth; i++)
@@ -67,8 +67,16 @@ namespace GearGenerator
             }
         }
 
-        
-        void DrawTooth( double startAngle )
+        private Point GetPointOnCircle(double angle, double radius)
+        {
+            var radians = DegreesToRadians(angle);
+            var x1 = CenterPoint.X + radius * Math.Cos(radians);
+            var y1 = CenterPoint.X + radius * Math.Sin(radians);
+            return new Point(x1, y1);
+        }
+
+
+        private void DrawTooth( double startAngle )
         {
             var involutePts = GetInvolutePoints(startAngle);
             var curve = DrawCurve(involutePts);
@@ -85,17 +93,11 @@ namespace GearGenerator
             var delta = startAngle - intersectAngle;
 
             var offset1Degrees = intersectAngle - (ToothSpacingDegrees * .25);
-            var offset1 = DegreesToRadians(offset1Degrees);
-            var x1 = CenterPoint.X + PitchRadius * Math.Cos(offset1);
-            var y1 = CenterPoint.X + PitchRadius * Math.Sin(offset1);
-            var mirrorPoint = new Point(x1, y1);
+            var mirrorPoint = GetPointOnCircle(offset1Degrees, PitchRadius);
             //DrawLine(CenterPoint, mirrorPoint, Brushes.Orange);
 
             var offset2Degrees = offset1Degrees - (ToothSpacingDegrees * .25);
-            var offset2 = DegreesToRadians(offset2Degrees);
-            var x2 = CenterPoint.X + PitchRadius * Math.Cos(offset2);
-            var y2 = CenterPoint.X + PitchRadius * Math.Sin(offset2);
-            var mirrorPoint2 = new Point(x2, y2);
+            var mirrorPoint2 = GetPointOnCircle(offset2Degrees, PitchRadius);
             //DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
             var mirrorPts = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
@@ -103,27 +105,24 @@ namespace GearGenerator
             DrawCircle(mirrorPoint, 1, Brushes.Lime);
             var mirrorCurve = DrawCurve(mirrorPts);
 
+            //Draw the top of the tooth, which is a line around the outside circle between the top of each curve
             var mirrorIntersects = GetIntersectionPoints(mirrorCurve, _outerCircle);
             var outerIntersects = GetIntersectionPoints(curve, _outerCircle);
             if (mirrorIntersects.Any() && outerIntersects.Any())
                 DrawLine(mirrorIntersects[0], outerIntersects[0]);
 
-            //_canvas.Children.Remove(mirrorCurve);
-            //_canvas.UpdateLayout();
+            TrimToOutsideRadius(mirrorCurve);
+            TrimToOutsideRadius(curve);
 
-            //var pointsToDraw = mirrorPts.Where(x => GetDistance(x, CenterPoint) <= OutsideRadius).ToList();
-            //pointsToDraw.Add( mirrorIntersects[0]);
-            //DrawCurve(pointsToDraw);
-
-            //DrawCircle(outerIntersects[0], 1, Brushes.Orange);
-            //DrawCircle(pointsToDraw.Last(), 1, Brushes.Orange);
-
-            //DrawLine(outerIntersects[0], pointsToDraw.Last(), Brushes.Red );
-            Trim(mirrorCurve);
-            Trim(curve);
+            //DrawCircle(mirrorPts.First(), 1, Brushes.Red);
+            //var angle = offset2;
+            //var x3 = CenterPoint.X + RootRadius * Math.Cos(angle);
+            //var y3 = CenterPoint.X + RootRadius * Math.Sin(angle);
+            //var foo = new Point(x3, y3);
+            //DrawLine(mirrorPts.First(), foo);
         }
 
-        void Trim(Path path)
+        private void TrimToOutsideRadius(Path path)
         {
             var data = path.Data.Clone();
             var g = data.GetFlattenedPathGeometry();
@@ -157,17 +156,14 @@ namespace GearGenerator
             _canvas.Children.Add(new Path{ Data = g, StrokeThickness = 1, Stroke = Brushes.Black});
         }
 
-        IEnumerable<Point> GetInvolutePoints( double startAngle, bool reverse = false )
+        private IEnumerable<Point> GetInvolutePoints( double startAngle, bool reverse = false )
         {
             const int intervalCount = 20;
 
             for (var i = 0; i < intervalCount; i++)
             {
                 var offsetDegrees = startAngle - (i * FCB) * ( reverse ? -1 : 1 );
-                var offset = DegreesToRadians(offsetDegrees);
-                var x = CenterPoint.X + BaseRadius * Math.Cos(offset);
-                var y = CenterPoint.X + BaseRadius * Math.Sin(offset);
-                var point = new Point(x, y);
+                var point = GetPointOnCircle( offsetDegrees, BaseRadius );
 
                 //find tangents points
                 var v = CenterPoint - point;
@@ -183,17 +179,16 @@ namespace GearGenerator
             }
         }
 
-        static double GetDistance(Point p1, Point p2)
+        private static double GetDistance(Point p1, Point p2)
         {
             var deltaY = p1.Y - p2.Y;
             var deltaX = p1.X - p2.X;
-            double newDistance = Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
-            return newDistance;
+            return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
-        static double DegreesToRadians(double degrees) => degrees * 0.01745329252;
+        private static double DegreesToRadians(double degrees) => degrees * 0.01745329252;
 
-        static Point CalculatePoint(Point a, Point b, double distance)
+        private static Point CalculatePoint(Point a, Point b, double distance)
         {
             // a. calculate the vector from o to g:
             var vectorX = b.X - a.X;
@@ -210,7 +205,7 @@ namespace GearGenerator
             return new Point(a.X + vectorX, a.Y + vectorY);
         }
 
-        static Point[] GetIntersectionPoints(Path g1, Path g2)
+        private static Point[] GetIntersectionPoints(Path g1, Path g2)
         {
             Geometry og1 = g1.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g1.StrokeThickness));
             Geometry og2 = g2.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g2.StrokeThickness));
@@ -231,7 +226,6 @@ namespace GearGenerator
         private double BaseRadius => _gear.BaseRadius;
         private double ToothSpacingDegrees => _gear.ToothSpacingDegrees;
         private double FCB => _gear.FCB;
-
 
         public int Teeth
         {
@@ -280,10 +274,10 @@ namespace GearGenerator
                 Stroke = stroke ?? Brushes.Black,
                 StrokeThickness = 1,
                 StrokeDashArray = dashArray == null ? null : new DoubleCollection(dashArray),
-                Data = new EllipseGeometry { Center = center, RadiusX = radius, RadiusY = radius }
+                Data = new EllipseGeometry {Center = center, RadiusX = radius, RadiusY = radius},
+                ToolTip = $"X: {center.X}, Y: {center.Y}"
             };
 
-            circle.ToolTip = $"X: {center.X}, Y: {center.Y}";
             _canvas.Children.Add(circle);
             return circle;
         }
