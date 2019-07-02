@@ -12,12 +12,14 @@ using GearGenerator.Annotations;
 namespace GearGenerator
 {
     //Drawing a gear: http://www.cartertools.com/involute.html
+    //https://geargenerator.com/#200,200,100,6,1,0,146371.80000067202,4,1,8,2,4,27,-90,0,0,16,4,4,27,-60,1,1,12,1,12,20,-60,2,0,60,5,12,20,0,0,0,2,-399
     public class Gear2dViewModel : INotifyPropertyChanged
     {
         private readonly Gear _gear;
         private readonly Canvas _canvas;
 
         public Point CenterPoint { get; }
+        private Path _outerCircle;
         private Path _pitchCircle;
 
         public Gear2dViewModel( Gear gear, Canvas canvas )
@@ -46,7 +48,7 @@ namespace GearGenerator
             _canvas.Children.Clear();
             //DrawPieSlices();
             
-            DrawCircle(CenterPoint, OutsideRadius, Brushes.Red, 2d, 4d); 
+            _outerCircle = DrawCircle(CenterPoint, OutsideRadius, Brushes.DimGray, 2d, 4d); 
             DrawCircle(CenterPoint, RootRadius, Brushes.Blue, 2d, 4d);
 
             DrawCircle(CenterPoint, BaseRadius, Brushes.Orange, 2d, 4d); 
@@ -63,7 +65,6 @@ namespace GearGenerator
                 DrawTooth(angle);
                 angle += ToothSpacingDegrees;
             }
-            //DrawTooth( 120 );
         }
 
         
@@ -72,11 +73,10 @@ namespace GearGenerator
             var involutePts = GetInvolutePoints(startAngle);
             var curve = DrawCurve(involutePts);
 
-            
             //find where the involute point intersects with the pitch circle
             var intersection = GetIntersectionPoints(curve, _pitchCircle).FirstOrDefault();
             DrawCircle(intersection, 1, Brushes.Red);
-            DrawLine(CenterPoint, intersection, Brushes.Red);
+            //DrawLine(CenterPoint, intersection, Brushes.Red);
 
             var xDiff = intersection.X - CenterPoint.X;
             var yDiff = intersection.Y - CenterPoint.Y;
@@ -89,24 +89,78 @@ namespace GearGenerator
             var x1 = CenterPoint.X + PitchRadius * Math.Cos(offset1);
             var y1 = CenterPoint.X + PitchRadius * Math.Sin(offset1);
             var mirrorPoint = new Point(x1, y1);
-            DrawLine(CenterPoint, mirrorPoint, Brushes.Orange);
+            //DrawLine(CenterPoint, mirrorPoint, Brushes.Orange);
 
             var offset2Degrees = offset1Degrees - (ToothSpacingDegrees * .25);
             var offset2 = DegreesToRadians(offset2Degrees);
             var x2 = CenterPoint.X + PitchRadius * Math.Cos(offset2);
             var y2 = CenterPoint.X + PitchRadius * Math.Sin(offset2);
             var mirrorPoint2 = new Point(x2, y2);
-            DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
-
+            //DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
             var mirrorPts = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
-            DrawCircle(mirrorPoint2, 1, Brushes.Red);
-            DrawCurve(mirrorPts);
+
+            DrawCircle(mirrorPoint, 1, Brushes.Lime);
+            var mirrorCurve = DrawCurve(mirrorPts);
+
+            var mirrorIntersects = GetIntersectionPoints(mirrorCurve, _outerCircle);
+            var outerIntersects = GetIntersectionPoints(curve, _outerCircle);
+            if (mirrorIntersects.Any() && outerIntersects.Any())
+                DrawLine(mirrorIntersects[0], outerIntersects[0]);
+
+            //_canvas.Children.Remove(mirrorCurve);
+            //_canvas.UpdateLayout();
+
+            //var pointsToDraw = mirrorPts.Where(x => GetDistance(x, CenterPoint) <= OutsideRadius).ToList();
+            //pointsToDraw.Add( mirrorIntersects[0]);
+            //DrawCurve(pointsToDraw);
+
+            //DrawCircle(outerIntersects[0], 1, Brushes.Orange);
+            //DrawCircle(pointsToDraw.Last(), 1, Brushes.Orange);
+
+            //DrawLine(outerIntersects[0], pointsToDraw.Last(), Brushes.Red );
+            Trim(mirrorCurve);
+            Trim(curve);
+        }
+
+        void Trim(Path path)
+        {
+            var data = path.Data.Clone();
+            var g = data.GetFlattenedPathGeometry();
+            for( var i = g.Figures.Count-1; i>=0; i--)
+            {
+                var figure = g.Figures[i].Clone();
+                g.Figures.RemoveAt(i);
+                g.Figures.Insert(i, figure);
+
+                for (var s = figure.Segments.Count- 1; s >= 0; s--)
+                {
+                    var segment = figure.Segments[s];
+                    if (!(segment is PolyLineSegment poly)) continue;
+
+                    var s2 = poly.Clone();
+                    figure.Segments.RemoveAt(s);
+
+                    for (var y = s2.Points.Count - 1; y >= 0; y--)
+                    {
+                        var pt = s2.Points[y];
+                        var distance = GetDistance(pt, CenterPoint);
+                        if ( distance > OutsideRadius ) s2.Points.RemoveAt(y);
+                    }
+
+                    figure.Segments.Insert(s, s2);
+                }
+
+            }
+
+            _canvas.Children.Remove(path);
+            _canvas.Children.Add(new Path{ Data = g, StrokeThickness = 1, Stroke = Brushes.Black});
         }
 
         IEnumerable<Point> GetInvolutePoints( double startAngle, bool reverse = false )
         {
             const int intervalCount = 20;
+
             for (var i = 0; i < intervalCount; i++)
             {
                 var offsetDegrees = startAngle - (i * FCB) * ( reverse ? -1 : 1 );
@@ -125,9 +179,16 @@ namespace GearGenerator
                 var arcLength = (2 * Math.PI * BaseRadius) * ((i * (FCB)) / 360d);
                 var pt = CalculatePoint(point, tangentPoint, arcLength);
 
-                
                 yield return pt;
             }
+        }
+
+        static double GetDistance(Point p1, Point p2)
+        {
+            var deltaY = p1.Y - p2.Y;
+            var deltaX = p1.X - p2.X;
+            double newDistance = Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+            return newDistance;
         }
 
         static double DegreesToRadians(double degrees) => degrees * 0.01745329252;
@@ -192,15 +253,7 @@ namespace GearGenerator
             }
         }
 
-        public double DiametralPitch
-        {
-            get => _gear.DiametralPitch;
-            set
-            {
-                _gear.DiametralPitch = value;
-                OnPropertyChanged();
-            }
-        }
+        public double DiametralPitch => _gear.DiametralPitch;
 
         public double PressureAngle
         {
@@ -230,6 +283,7 @@ namespace GearGenerator
                 Data = new EllipseGeometry { Center = center, RadiusX = radius, RadiusY = radius }
             };
 
+            circle.ToolTip = $"X: {center.X}, Y: {center.Y}";
             _canvas.Children.Add(circle);
             return circle;
         }
@@ -257,10 +311,8 @@ namespace GearGenerator
                 StrokeThickness = thickness,
                 Data = ToPathGeometry(points)
             };
-
             _canvas.Children.Add(curve);
             return curve;
-
         }
 
         private Path DrawLine(Point start, Point end, Brush stroke = null, double thickness = 1d, double[] dashArray = null)

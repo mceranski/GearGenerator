@@ -37,7 +37,7 @@
                 <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
 
                 <Label Grid.Row="4" Content="Diametral Pitch"/>
-                <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding DiametralPitch, Mode=TwoWay, StringFormat=n}"/>
+                <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding DiametralPitch, Mode=OneWay}"/>
 
                 <Label Grid.Row="6" Content="Pressure Angle"/>
                 <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>

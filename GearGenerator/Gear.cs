@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace GearGenerator
 {
+    //http://www.gearseds.com/files/6.3.1_Gear_Terms_Lesson_rev3.pdf
     public class Gear
     {
         //The number of teeth on the gear
@@ -14,7 +15,7 @@ namespace GearGenerator
         public double PressureAngle { get; set; }
         public double PressureRadians => DegreesToRadians(PressureAngle);
 
-        public double DiametralPitch { get; set; }
+        public double DiametralPitch => Teeth / PitchDiameter;
         public double PitchDiameter { get; set; }
 
         public double PitchRadius => PitchDiameter / 2d;
@@ -30,16 +31,18 @@ namespace GearGenerator
         public double ACBDegrees => 360d / NCB;
         public double ToothSpacingDegrees => ( 360d / Teeth );
 
+        //The radial distance from the pitch circle to the top of the gear tooth
         public double Addendum => 1d / DiametralPitch;
 
         //the dedendum (d) is computed differently for other pressure angles; see Machinery's Handbook for the correct formula
+        //The radial distance from the pitch circle to the bottom of the tooth
         public double Dedendum => 1.157 / DiametralPitch;
 
         //The outside diameter shows the size of the circle that surrounds the teeth.
-        public double OutsideDiameter => PitchDiameter + ( 2d * Addendum );
+        public double OutsideDiameter => (Teeth + 2) / DiametralPitch;
         public double OutsideRadius => OutsideDiameter / 2d;
 
-        public double RootDiameter => PitchDiameter - ( 2d * Dedendum );
+        public double RootDiameter => (Teeth -2) / DiametralPitch;
         public double RootRadius => RootDiameter / 2d;
 
         static double DegreesToRadians(double degrees)
