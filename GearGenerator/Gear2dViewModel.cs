@@ -11,10 +11,22 @@ using GearGenerator.Annotations;
 
 namespace GearGenerator
 {
+    public class Tooth
+    {
+        public Point[] MirrorPoints;
+        public Point[] InvolutePoints;
+        public Path Top;
+        public Point BottomLeft;
+        public Point BottomRight;
+        public Path InvoluteCurve;
+        public Path MirroredCurve;
+    }
+
     //Drawing a gear: http://www.cartertools.com/involute.html
     //https://geargenerator.com/#200,200,100,6,1,0,146371.80000067202,4,1,8,2,4,27,-90,0,0,16,4,4,27,-60,1,1,12,1,12,20,-60,2,0,60,5,12,20,0,0,0,2,-399
     public class Gear2dViewModel : INotifyPropertyChanged
     {
+        private List<Tooth> _teeth = new List<Tooth>();
         private readonly Gear _gear;
         private readonly Canvas _canvas;
 
@@ -60,10 +72,14 @@ namespace GearGenerator
             DrawLine(new Point(CenterPoint.X - OutsideRadius * 1.1, CenterPoint.Y), new Point(CenterPoint.X + OutsideRadius * 1.1, CenterPoint.Y), Brushes.Black, 5, 4, 15, 4); //horizontal line
 
             var angle = 0d;
+            Tooth lastTooth = null;
             while (angle <= 360d)
             {
-                DrawTooth(angle);
+                var tooth = DrawTooth(angle);
+                if (lastTooth != null)
+                    DrawLine(lastTooth.BottomLeft, tooth.BottomRight);
                 angle += ToothSpacingDegrees;
+                lastTooth = tooth;
             }
         }
 
@@ -76,13 +92,14 @@ namespace GearGenerator
         }
 
 
-        private void DrawTooth( double startAngle )
+        private Tooth DrawTooth( double startAngle )
         {
-            var involutePts = GetInvolutePoints(startAngle);
-            var curve = DrawCurve(involutePts);
+            var tooth = new Tooth();
+            tooth.InvolutePoints = GetInvolutePoints(startAngle).ToArray();
+            tooth.InvoluteCurve = DrawCurve(tooth.InvolutePoints);
 
             //find where the involute point intersects with the pitch circle
-            var intersection = GetIntersectionPoints(curve, _pitchCircle).FirstOrDefault();
+            var intersection = GetIntersectionPoints(tooth.InvoluteCurve, _pitchCircle).FirstOrDefault();
             DrawCircle(intersection, 1, Brushes.Red);
             //DrawLine(CenterPoint, intersection, Brushes.Red);
 
@@ -100,26 +117,27 @@ namespace GearGenerator
             var mirrorPoint2 = GetPointOnCircle(offset2Degrees, PitchRadius);
             //DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
-            var mirrorPts = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
+            tooth.MirrorPoints = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
 
             DrawCircle(mirrorPoint, 1, Brushes.Lime);
-            var mirrorCurve = DrawCurve(mirrorPts);
+            tooth.MirroredCurve = DrawCurve(tooth.MirrorPoints);
 
             //Draw the top of the tooth, which is a line around the outside circle between the top of each curve
-            var mirrorIntersects = GetIntersectionPoints(mirrorCurve, _outerCircle);
-            var outerIntersects = GetIntersectionPoints(curve, _outerCircle);
+            var mirrorIntersects = GetIntersectionPoints(tooth.MirroredCurve, _outerCircle);
+            var outerIntersects = GetIntersectionPoints(tooth.InvoluteCurve, _outerCircle);
             if (mirrorIntersects.Any() && outerIntersects.Any())
-                DrawLine(mirrorIntersects[0], outerIntersects[0]);
+                tooth.Top = DrawLine(mirrorIntersects[0], outerIntersects[0]);
 
-            TrimToOutsideRadius(mirrorCurve);
-            TrimToOutsideRadius(curve);
+            TrimToOutsideRadius(tooth.MirroredCurve);
+            TrimToOutsideRadius(tooth.InvoluteCurve);
 
-            //DrawCircle(mirrorPts.First(), 1, Brushes.Red);
-            //var angle = offset2;
-            //var x3 = CenterPoint.X + RootRadius * Math.Cos(angle);
-            //var y3 = CenterPoint.X + RootRadius * Math.Sin(angle);
-            //var foo = new Point(x3, y3);
-            //DrawLine(mirrorPts.First(), foo);
+            tooth.BottomRight = GetPointOnCircle(offset2Degrees - delta, RootRadius);
+            DrawLine(tooth.MirrorPoints.First(), tooth.BottomRight, Brushes.Black);
+
+            tooth.BottomLeft = GetPointOnCircle(intersectAngle + delta, RootRadius);
+            DrawLine(tooth.InvolutePoints.First(), tooth.BottomLeft, Brushes.Black);
+
+            return tooth;
         }
 
         private void TrimToOutsideRadius(Path path)
