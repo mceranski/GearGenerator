@@ -31,6 +31,8 @@ namespace GearGenerator
         {
             DrawGrid();
             var gear = new Gear {Teeth = 8, PitchDiameter = 200, PressureAngle = 27 };
+            //var gear = new Gear { Teeth = 16, PitchDiameter = 400, PressureAngle = 27 };
+            //var gear = new Gear { Teeth = 60, PitchDiameter = 500, PressureAngle = 20 };
             var vm = new Gear2dViewModel( gear, Canvas );
             this.DataContext = vm;
             //vm.Draw();

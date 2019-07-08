@@ -11,22 +11,23 @@ using GearGenerator.Annotations;
 
 namespace GearGenerator
 {
+    public class InvoluteCurve
+    {
+        public Point[] Points;
+        public Point FurthestPoint => Points.Last();
+        public Point ClosestPoint => Points.First();
+    }
+
     public class Tooth
     {
-        public Point[] MirrorPoints;
-        public Point[] InvolutePoints;
-        public Path Top;
-        public Point BottomLeft;
-        public Point BottomRight;
-        public Path InvoluteCurve;
-        public Path MirroredCurve;
+        public InvoluteCurve Primary;
+        public InvoluteCurve Mirror;
     }
 
     //Drawing a gear: http://www.cartertools.com/involute.html
     //https://geargenerator.com/#200,200,100,6,1,0,146371.80000067202,4,1,8,2,4,27,-90,0,0,16,4,4,27,-60,1,1,12,1,12,20,-60,2,0,60,5,12,20,0,0,0,2,-399
     public class Gear2dViewModel : INotifyPropertyChanged
     {
-        private List<Tooth> _teeth = new List<Tooth>();
         private readonly Gear _gear;
         private readonly Canvas _canvas;
 
@@ -60,11 +61,17 @@ namespace GearGenerator
             _canvas.Children.Clear();
             //DrawPieSlices();
             
-            _outerCircle = DrawCircle(CenterPoint, OutsideRadius, Brushes.DimGray, 2d, 4d); 
-            DrawCircle(CenterPoint, RootRadius, Brushes.Blue, 2d, 4d);
+            _outerCircle = DrawCircle(CenterPoint, OutsideRadius, Brushes.Silver, 2d, 4d);
+            _outerCircle.ToolTip = "Outer";
 
-            DrawCircle(CenterPoint, BaseRadius, Brushes.Orange, 2d, 4d); 
+            var rootCircle = DrawCircle(CenterPoint, RootRadius, Brushes.Blue, 2d, 4d);
+            rootCircle.ToolTip = "Root";
+
+            var baseCircle = DrawCircle(CenterPoint, BaseRadius, Brushes.Orange, 2d, 4d);
+            baseCircle.ToolTip = "Base";
+
             _pitchCircle = DrawCircle(CenterPoint, PitchRadius, Brushes.Green, 2d, 4d);
+            _pitchCircle.ToolTip = "Pitch";
             DrawCircle(CenterPoint, OutsideRadius * .25);
 
             //_canvas.DrawCircle(CenterPoint, OutsideRadius * 1.25); //bore point
@@ -76,11 +83,16 @@ namespace GearGenerator
             while (angle <= 360d)
             {
                 var tooth = DrawTooth(angle);
+                DrawCurve(tooth.Primary.Points);
+                DrawCurve(tooth.Mirror.Points);
+                DrawLine(tooth.Primary.FurthestPoint, tooth.Mirror.FurthestPoint);
                 if (lastTooth != null)
-                    DrawLine(lastTooth.BottomLeft, tooth.BottomRight);
+                    DrawLine(lastTooth.Primary.ClosestPoint, tooth.Mirror.ClosestPoint);
                 angle += ToothSpacingDegrees;
                 lastTooth = tooth;
             }
+
+            //DrawTooth(180);
         }
 
         private Point GetPointOnCircle(double angle, double radius)
@@ -94,90 +106,69 @@ namespace GearGenerator
 
         private Tooth DrawTooth( double startAngle )
         {
-            var tooth = new Tooth();
-            tooth.InvolutePoints = GetInvolutePoints(startAngle).ToArray();
-            tooth.InvoluteCurve = DrawCurve(tooth.InvolutePoints);
+            var involutePoints = GetInvolutePoints(startAngle).ToList();
 
             //find where the involute point intersects with the pitch circle
-            var intersection = GetIntersectionPoints(tooth.InvoluteCurve, _pitchCircle).FirstOrDefault();
-            DrawCircle(intersection, 1, Brushes.Red);
-            //DrawLine(CenterPoint, intersection, Brushes.Red);
+            var pitchIntersect = FindIntersectionPoint(involutePoints, PitchRadius);
+            involutePoints.Add(pitchIntersect);
+            var rootIntersect = FindIntersectionPoint(involutePoints, RootRadius);
+            involutePoints.Add(rootIntersect);
+            var outerIntersect = FindIntersectionPoint(involutePoints, OutsideRadius);
+            involutePoints.Add(outerIntersect);
 
-            var xDiff = intersection.X - CenterPoint.X;
-            var yDiff = intersection.Y - CenterPoint.Y;
+            var xDiff = pitchIntersect.X - CenterPoint.X;
+            var yDiff = pitchIntersect.Y - CenterPoint.Y;
             var intersectAngle = Math.Atan2(yDiff, xDiff) * 180d / Math.PI;
 
             var delta = startAngle - intersectAngle;
 
             var offset1Degrees = intersectAngle - (ToothSpacingDegrees * .25);
-            var mirrorPoint = GetPointOnCircle(offset1Degrees, PitchRadius);
+            //var mirrorPoint = GetPointOnCircle(offset1Degrees, PitchRadius);
             //DrawLine(CenterPoint, mirrorPoint, Brushes.Orange);
 
             var offset2Degrees = offset1Degrees - (ToothSpacingDegrees * .25);
-            var mirrorPoint2 = GetPointOnCircle(offset2Degrees, PitchRadius);
+            //var mirrorPoint2 = GetPointOnCircle(offset2Degrees, PitchRadius);
             //DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
-            tooth.MirrorPoints = GetInvolutePoints(offset2Degrees - delta, true).ToArray();
+            var mirrorPoints = GetInvolutePoints(offset2Degrees - delta, true).ToList();
+            var mirrorOuterIntersect = FindIntersectionPoint(mirrorPoints, OutsideRadius);
+            mirrorPoints.Add(mirrorOuterIntersect);
+            var mirrorPitchIntersect = FindIntersectionPoint(mirrorPoints, PitchRadius);
+            mirrorPoints.Add(mirrorPitchIntersect);
+            var mirrorRootIntersect = FindIntersectionPoint(mirrorPoints, RootRadius);
+            mirrorPoints.Add(mirrorRootIntersect);
 
-            DrawCircle(mirrorPoint, 1, Brushes.Lime);
-            tooth.MirroredCurve = DrawCurve(tooth.MirrorPoints);
-
-            //Draw the top of the tooth, which is a line around the outside circle between the top of each curve
-            var mirrorIntersects = GetIntersectionPoints(tooth.MirroredCurve, _outerCircle);
-            var outerIntersects = GetIntersectionPoints(tooth.InvoluteCurve, _outerCircle);
-            if (mirrorIntersects.Any() && outerIntersects.Any())
-                tooth.Top = DrawLine(mirrorIntersects[0], outerIntersects[0]);
-
-            TrimToOutsideRadius(tooth.MirroredCurve);
-            TrimToOutsideRadius(tooth.InvoluteCurve);
-
-            tooth.BottomRight = GetPointOnCircle(offset2Degrees - delta, RootRadius);
-            DrawLine(tooth.MirrorPoints.First(), tooth.BottomRight, Brushes.Black);
-
-            tooth.BottomLeft = GetPointOnCircle(intersectAngle + delta, RootRadius);
-            DrawLine(tooth.InvolutePoints.First(), tooth.BottomLeft, Brushes.Black);
+            var tooth = new Tooth
+            {
+                Primary = new InvoluteCurve
+                {
+                    Points = involutePoints.Where(IsPointApplicable).OrderBy(x => GetDistance(CenterPoint, x)).ToArray()
+                } ,
+                Mirror = new InvoluteCurve
+                {
+                    Points = mirrorPoints.Where(IsPointApplicable).OrderBy(x => GetDistance(CenterPoint, x)).ToArray()
+                }
+            };
 
             return tooth;
         }
 
-        private void TrimToOutsideRadius(Path path)
+        private bool IsPointApplicable(Point p)
         {
-            var data = path.Data.Clone();
-            var g = data.GetFlattenedPathGeometry();
-            for( var i = g.Figures.Count-1; i>=0; i--)
-            {
-                var figure = g.Figures[i].Clone();
-                g.Figures.RemoveAt(i);
-                g.Figures.Insert(i, figure);
+            var d = GetDistance(CenterPoint, p);
+            var threshold = OutsideRadius * .001;
+            var deltaOuter = Math.Abs( d - OutsideRadius );
+            var deltaInner = Math.Abs(d - RootRadius);
 
-                for (var s = figure.Segments.Count- 1; s >= 0; s--)
-                {
-                    var segment = figure.Segments[s];
-                    if (!(segment is PolyLineSegment poly)) continue;
+            var outerOk = d <= OutsideRadius || deltaOuter <= threshold;
+            var innerOK = d >= RootRadius || deltaInner <= threshold;
 
-                    var s2 = poly.Clone();
-                    figure.Segments.RemoveAt(s);
-
-                    for (var y = s2.Points.Count - 1; y >= 0; y--)
-                    {
-                        var pt = s2.Points[y];
-                        var distance = GetDistance(pt, CenterPoint);
-                        if ( distance > OutsideRadius ) s2.Points.RemoveAt(y);
-                    }
-
-                    figure.Segments.Insert(s, s2);
-                }
-
-            }
-
-            _canvas.Children.Remove(path);
-            _canvas.Children.Add(new Path{ Data = g, StrokeThickness = 1, Stroke = Brushes.Black});
+            return innerOK && outerOk;
         }
 
         private IEnumerable<Point> GetInvolutePoints( double startAngle, bool reverse = false )
         {
             const int intervalCount = 20;
-
             for (var i = 0; i < intervalCount; i++)
             {
                 var offsetDegrees = startAngle - (i * FCB) * ( reverse ? -1 : 1 );
@@ -193,14 +184,77 @@ namespace GearGenerator
                 var arcLength = (2 * Math.PI * BaseRadius) * ((i * (FCB)) / 360d);
                 var pt = CalculatePoint(point, tangentPoint, arcLength);
 
+                //var distance = GetDistance(pt, CenterPoint);
+                //if (distance > OutsideRadius) { DrawDot(pt, Brushes.Red);}
+
                 yield return pt;
             }
         }
 
+        private Point FindIntersectionPoint(IReadOnlyList<Point> points, double radius)
+        {
+            for (var i = 1; i < points.Count; i++)
+            {
+                var startPoint = points[i - 1];
+                var endPoint = points[i];
+
+                if (!IsIntersecting(startPoint, endPoint, radius)) continue;
+
+                FindIntersect(startPoint, endPoint, radius, out var intersection);
+                return intersection;
+            }
+
+            return CenterPoint;
+        }
+
+        private bool IsInsideCircle(Point point, double radius )
+        {
+            return Math.Sqrt(Math.Pow((CenterPoint.X - point.X), 2d) +
+                             Math.Pow((CenterPoint.Y - point.Y), 2d)) < radius;
+        }
+
+        private bool IsIntersecting( Point startPoint, Point endPoint, double radius )
+        {
+            return IsInsideCircle(startPoint, radius) ^ IsInsideCircle(endPoint, radius);
+        }
+
+        private bool FindIntersect(Point startPoint, Point endPoint, double radius, out Point intersection )
+        {
+            if (IsIntersecting( startPoint, endPoint, radius))
+            {
+                //Calculate terms of the linear and quadratic equations
+                var m1 = (endPoint.Y - startPoint.Y) / (endPoint.X - startPoint.X);
+                var b1 = startPoint.Y - m1 * startPoint.X;
+                var a = 1 + m1 * m1;
+                var b = 2 * (m1 * b1 - m1 * CenterPoint.Y - CenterPoint.X);
+                var c = CenterPoint.X * CenterPoint.X + b1 * b1 + CenterPoint.Y * CenterPoint.Y -
+                        radius * radius - 2 * b1 * CenterPoint.Y;
+                // solve quadratic equation
+                var sqRtTerm = Math.Sqrt(b * b - 4 * a * c);
+                var x = ((-b) + sqRtTerm) / (2 * a);
+                // make sure we have the correct root for our line segment
+                if ((x < Math.Min(startPoint.X, endPoint.X) ||
+                     (x > Math.Max(startPoint.X, endPoint.X))))
+                { x = ((-b) - sqRtTerm) / (2 * a); }
+                //solve for the y-component
+                var y = m1 * x + b1;
+                // Intersection Calculated
+                intersection = new Point(x, y);
+                return true;
+            }
+
+            // Line segment does not intersect at one point.  It is either 
+            // fully outside, fully inside, intersects at two points, is 
+            // tangential to, or one or more points is exactly on the 
+            // circle radius.
+            intersection = new Point(0,0);
+            return false;
+        }
+
         private static double GetDistance(Point p1, Point p2)
         {
-            var deltaY = p1.Y - p2.Y;
-            var deltaX = p1.X - p2.X;
+            var deltaY = p2.Y - p1.Y;
+            var deltaX = p2.X - p1.X;
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
@@ -221,21 +275,6 @@ namespace GearGenerator
 
             // d. calculate and Draw the new vector,
             return new Point(a.X + vectorX, a.Y + vectorY);
-        }
-
-        private static Point[] GetIntersectionPoints(Path g1, Path g2)
-        {
-            Geometry og1 = g1.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g1.StrokeThickness));
-            Geometry og2 = g2.Data.GetWidenedPathGeometry(new Pen(Brushes.Black, g2.StrokeThickness));
-            var cg = new CombinedGeometry(GeometryCombineMode.Intersect, og1, og2);
-            var pg = cg.GetFlattenedPathGeometry();
-            var result = new Point[pg.Figures.Count];
-            for (var i = 0; i < pg.Figures.Count; i++)
-            {
-                var fig = new PathGeometry(new[] { pg.Figures[i] }).Bounds;
-                result[i] = new Point(fig.Left + fig.Width / 2.0, fig.Top + fig.Height / 2.0);
-            }
-            return result;
         }
 
         private double OutsideRadius => _gear.OutsideRadius;
@@ -285,6 +324,11 @@ namespace GearGenerator
             Draw();
         }
 
+        private Path DrawDot(Point pt, Brush stroke = null)
+        {
+            return DrawCircle(pt, 1, stroke);
+        }
+
         private Path DrawCircle(Point center, double radius, Brush stroke = null, params double[] dashArray)
         {
             var circle = new Path
@@ -311,7 +355,7 @@ namespace GearGenerator
             return new PathGeometry
             {
                 Figures = new PathFigureCollection(enumerable.Select(x =>
-                    new PathFigure(enumerable[0], new PathSegment[] { new PolyBezierSegment(enumerable, true) }, false)))
+                    new PathFigure(enumerable[0], new PathSegment[] { new PolyLineSegment(enumerable, true),  }, false)))
             };
         }
 
