@@ -54,8 +54,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CanvasExtensions.cs" />
-    <Compile Include="GearShape.cs" />
+    <Compile Include="Utils\CanvasExtensions.cs" />
     <Compile Include="ViewModels\GearViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Models\Tooth.cs" />

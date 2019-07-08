@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using GearGenerator.Utils;
 using GearGenerator.ViewModels;
 
 namespace GearGenerator.Views
@@ -54,15 +55,7 @@ namespace GearGenerator.Views
 
         private void DrawGear(GearViewModel gear)
         {
-            var gearShape = new GearControl
-            {
-                CenterPoint = new Point(gear.CenterX, gear.CenterY),
-                Teeth = gear.Teeth,
-                PressureAngle = gear.PressureAngle,
-                PitchDiameter = gear.PitchDiameter
-            };
-
-            var geometry = gearShape.PathGeometry;
+            var geometry = gear.GearGeometry;
             var path = new Path { Stroke = Brushes.Black, StrokeThickness = 1, Data = geometry };
 
             if (_viewModel.UseAnimation)
