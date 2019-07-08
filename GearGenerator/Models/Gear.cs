@@ -8,9 +8,6 @@ namespace GearGenerator
     //http://www.gearseds.com/files/6.3.1_Gear_Terms_Lesson_rev3.pdf
     public class Gear
     {
-        //The number of teeth on the gear
-        public double Scale = 100;
-        
         public int Teeth { get; set; }
         public double PressureAngle { get; set; }
         public double PressureRadians => DegreesToRadians(PressureAngle);
