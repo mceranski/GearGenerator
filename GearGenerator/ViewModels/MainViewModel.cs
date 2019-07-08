@@ -27,6 +27,17 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        private bool _showGuidelines = true;
+        public bool ShowGuidelines
+        {
+            get => _showGuidelines;
+            set
+            {
+                _showGuidelines = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool _useAnimation;
         public bool UseAnimation
         {

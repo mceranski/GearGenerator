@@ -10,7 +10,7 @@ namespace GearGenerator.Views
     /// <summary>
     /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class MainView : Window
+    public partial class MainView
     {
         private readonly MainViewModel _viewModel;
         public MainView()
@@ -49,12 +49,17 @@ namespace GearGenerator.Views
             if( _viewModel.ShowGrid )
                 DrawGrid();
 
+            DrawGear(_viewModel.Gear1);
+        }
+
+        private void DrawGear(GearViewModel gear)
+        {
             var gearShape = new GearControl
             {
-                CenterPoint = new Point(_viewModel.Gear1.CenterX, _viewModel.Gear1.CenterY),
-                Teeth = _viewModel.Gear1.Teeth,
-                PressureAngle = _viewModel.Gear1.PressureAngle,
-                PitchDiameter = _viewModel.Gear1.PitchDiameter
+                CenterPoint = new Point(gear.CenterX, gear.CenterY),
+                Teeth = gear.Teeth,
+                PressureAngle = gear.PressureAngle,
+                PitchDiameter = gear.PitchDiameter
             };
 
             var geometry = gearShape.PathGeometry;
@@ -62,10 +67,30 @@ namespace GearGenerator.Views
 
             if (_viewModel.UseAnimation)
             {
-                var animation = new DoubleAnimation(360, 0, new Duration(TimeSpan.FromSeconds(15))) {RepeatBehavior = RepeatBehavior.Forever};
-                var rotateTransform = new RotateTransform {CenterX = _viewModel.Gear1.CenterX, CenterY = _viewModel.Gear1.CenterY};
+                var animation = new DoubleAnimation(360, 0, new Duration(TimeSpan.FromSeconds(15))) { RepeatBehavior = RepeatBehavior.Forever };
+                var rotateTransform = new RotateTransform { CenterX = gear.CenterX, CenterY = gear.CenterY };
                 rotateTransform.BeginAnimation(RotateTransform.AngleProperty, animation);
                 path.RenderTransform = rotateTransform;
+            }
+
+            var centerPoint = gear.CenterPoint;
+
+            if (_viewModel.ShowGuidelines)
+            {
+                var pitchCircle = Canvas.DrawCircle(centerPoint, gear.PitchRadius, Brushes.LightGray, 4d, 2d);
+                pitchCircle.ToolTip = $"Pitch : r{gear.PitchRadius}";
+
+                var baseCircle = Canvas.DrawCircle(centerPoint, gear.BaseRadius, Brushes.LightGreen, 4d, 2d);
+                baseCircle.ToolTip = $"Base : r{gear.BaseRadius}";
+
+                var outerCircle = Canvas.DrawCircle(centerPoint, gear.OutsideRadius, Brushes.LightCoral, 4d, 2d);
+                outerCircle.ToolTip = $"Outer: r{ gear.OutsideRadius}";
+
+                var rootCircle = Canvas.DrawCircle(centerPoint, gear.RootRadius, Brushes.LightBlue, 4d, 2d);
+                rootCircle.ToolTip = $"Root: r{ gear.RootRadius}";
+
+                Canvas.DrawLine(new Point(centerPoint.X, centerPoint.Y - gear.OutsideRadius * 1.1), new Point(centerPoint.X, centerPoint.Y + gear.OutsideRadius * 1.1), Brushes.Black, 5, 4, 15, 4); //vertical line
+                Canvas.DrawLine(new Point(centerPoint.X - gear.OutsideRadius * 1.1, centerPoint.Y), new Point(centerPoint.X + gear.OutsideRadius * 1.1, centerPoint.Y), Brushes.Black, 5, 4, 15, 4); //horizontal line
             }
 
             Canvas.Children.Add(path);

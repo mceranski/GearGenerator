@@ -31,7 +31,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <Label Content="Teeth"/>
+                    <Label Content="Number of Teeth"/>
                     <TextBox Grid.Column="2" Text="{Binding Gear1.Teeth, Mode=TwoWay}"/>
 
                     <Label Grid.Row="2" Content="Pitch Diameter"/>
@@ -46,13 +46,19 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <CheckBox IsChecked="{Binding ShowGrid, UpdateSourceTrigger=PropertyChanged}">
                         <TextBlock Text="Show Grid"/>
                     </CheckBox>
 
-                    <CheckBox Grid.Row="2" IsChecked="{Binding UseAnimation, UpdateSourceTrigger=PropertyChanged}">
+                    <CheckBox Grid.Row="2" IsChecked="{Binding ShowGuidelines, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBlock Text="Show Guidelines"/>
+                    </CheckBox>
+
+                    <CheckBox Grid.Row="4" IsChecked="{Binding UseAnimation, UpdateSourceTrigger=PropertyChanged}">
                         <TextBlock Text="Animate"/>
                     </CheckBox>
                 </Grid>

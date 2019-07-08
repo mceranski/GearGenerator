@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using GearGenerator.Models;
 
@@ -21,36 +24,45 @@ namespace GearGenerator
         {
             get
             {
-                _gear = new Gear { PitchDiameter = PitchDiameter, PressureAngle = PressureAngle, Teeth = Teeth };
+                _gear = new Gear { PitchDiameter = PitchDiameter, PressureAngle = PressureAngle, NumberOfTeeth = Teeth };
 
-                var grp = new GeometryGroup();
-
-                var gearOutline = new StreamGeometry();
-                using (var gc = gearOutline.Open())
+                var geoGroup = new GeometryGroup();
+                var teeth = new List<Tooth>();
+                var angle = 0d;
+                while (angle < 360d)
                 {
-                    var angle = 0d;
-                    Tooth lastTooth = null;
-                    while (angle <= 360d)
+                    var toothGeometry = new StreamGeometry();
+                    using (var gc = toothGeometry.Open())
                     {
                         var tooth = CreateTooth(angle);
-                        //var primaryCurve = ToPathGeometry(tooth.Primary.Points);
+                        teeth.Add( tooth );
                         gc.BeginFigure(tooth.PrimaryPoints.First(), false, false);
                         gc.PolyLineTo(tooth.PrimaryPoints, true, true);
                         gc.LineTo(tooth.MirrorPoints.First(), true, true);
                         gc.PolyLineTo(tooth.MirrorPoints, true, true);
-                        if (lastTooth != null)
-                        {
-                            gc.LineTo(lastTooth.PrimaryPoints.First(), true, true);
-                        }
                         angle += _gear.ToothSpacingDegrees;
-                        lastTooth = tooth;
+                        geoGroup.Children.Add(toothGeometry);
                     }
                 }
 
-                grp.Children.Add( new EllipseGeometry(CenterPoint, _gear.OutsideRadius * .25, _gear.OutsideRadius * .25 ));
+                //connect the bottoms of the teeth
+                for (var i = 0; i < teeth.Count; i++)
+                {
+                    var startPt = teeth[i].PrimaryPoints.First();
+                    var endPt = ( i == teeth.Count-1 ? teeth.First() : teeth[i+1] ).MirrorPoints.Last();
+                    var g = new StreamGeometry();
+                    using (var gc = g.Open())
+                    {
+                        gc.BeginFigure(startPt, false, false);
+                        gc.LineTo(endPt, true, false );
+                    }
+                    geoGroup.Children.Add( g );
+                }
 
-                grp.Children.Add( gearOutline );
-                return grp;
+                var boreGeo = new EllipseGeometry(CenterPoint, _gear.OutsideRadius * .25, _gear.OutsideRadius * .25);
+                geoGroup.Children.Add( boreGeo );
+
+                return geoGroup;
             }
         }
 

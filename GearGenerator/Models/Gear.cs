@@ -8,11 +8,11 @@ namespace GearGenerator
     //http://www.gearseds.com/files/6.3.1_Gear_Terms_Lesson_rev3.pdf
     public class Gear
     {
-        public int Teeth { get; set; }
+        public int NumberOfTeeth { get; set; }
         public double PressureAngle { get; set; }
         public double PressureRadians => DegreesToRadians(PressureAngle);
 
-        public double DiametralPitch => Teeth / PitchDiameter;
+        public double DiametralPitch => NumberOfTeeth / PitchDiameter;
         public double PitchDiameter { get; set; }
 
         public double PitchRadius => PitchDiameter / 2d;
@@ -26,7 +26,7 @@ namespace GearGenerator
         // The 1/20th of the Base Circle Radius (FCB) is an arbitrary division, which yields a very close approximation; you can use whatever fraction you think will yield a good result
         public double FCB => BaseRadius / 20d;
         public double ACBDegrees => 360d / NCB;
-        public double ToothSpacingDegrees => ( 360d / Teeth );
+        public double ToothSpacingDegrees => ( 360d / NumberOfTeeth );
 
         //The radial distance from the pitch circle to the top of the gear tooth
         public double Addendum => 1d / DiametralPitch;
@@ -36,10 +36,10 @@ namespace GearGenerator
         public double Dedendum => 1.157 / DiametralPitch;
 
         //The outside diameter shows the size of the circle that surrounds the teeth.
-        public double OutsideDiameter => (Teeth + 2) / DiametralPitch;
+        public double OutsideDiameter => (NumberOfTeeth + 2) / DiametralPitch;
         public double OutsideRadius => OutsideDiameter / 2d;
 
-        public double RootDiameter => (Teeth -2) / DiametralPitch;
+        public double RootDiameter => (NumberOfTeeth -2) / DiametralPitch;
         public double RootRadius => RootDiameter / 2d;
 
         static double DegreesToRadians(double degrees)

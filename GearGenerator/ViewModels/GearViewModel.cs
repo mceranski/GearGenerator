@@ -1,4 +1,6 @@
-﻿namespace GearGenerator.ViewModels
+﻿using System.Windows;
+
+namespace GearGenerator.ViewModels
 {
     public class GearViewModel : ViewModel
     {
@@ -9,13 +11,19 @@
             Model = new Gear
             {
                 PitchDiameter = 200,
-                Teeth = 8,
+                NumberOfTeeth = 8,
                 PressureAngle = 27,
             };
 
             CenterX = Model.OutsideRadius * 1.25;
             CenterY = Model.OutsideRadius * 1.25;
         }
+
+        public Point CenterPoint => new Point( CenterX, CenterY );
+        public double PitchRadius => Model.PitchRadius;
+        public double OutsideRadius => Model.OutsideRadius;
+        public double RootRadius => Model.RootRadius;
+        public double BaseRadius => Model.BaseRadius;
 
         private double _centerX;
         public double CenterX
@@ -41,10 +49,10 @@
 
         public int Teeth
         {
-            get => Model.Teeth;
+            get => Model.NumberOfTeeth;
             set
             {
-                Model.Teeth = value;
+                Model.NumberOfTeeth = value;
                 OnPropertyChanged();
             }
         }
