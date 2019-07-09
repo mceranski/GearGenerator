@@ -32,7 +32,7 @@
                     </Grid.RowDefinitions>
 
                     <Label Content="Number of Teeth"/>
-                    <TextBox Grid.Column="2" Text="{Binding Gear1.Teeth, Mode=TwoWay}"/>
+                    <TextBox Grid.Column="2" Text="{Binding Gear1.NumberOfTeeth, Mode=TwoWay}"/>
 
                     <Label Grid.Row="2" Content="Pitch Diameter"/>
                     <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding Gear1.PitchDiameter, Mode=TwoWay}"/>

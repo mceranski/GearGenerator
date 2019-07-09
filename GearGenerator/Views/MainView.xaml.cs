@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -85,6 +86,11 @@ namespace GearGenerator.Views
                 Canvas.DrawLine(new Point(centerPoint.X, centerPoint.Y - gear.OutsideRadius * 1.1), new Point(centerPoint.X, centerPoint.Y + gear.OutsideRadius * 1.1), Brushes.Black, 5, 4, 15, 4); //vertical line
                 Canvas.DrawLine(new Point(centerPoint.X - gear.OutsideRadius * 1.1, centerPoint.Y), new Point(centerPoint.X + gear.OutsideRadius * 1.1, centerPoint.Y), Brushes.Black, 5, 4, 15, 4); //horizontal line
             }
+
+            //foreach (var point in gear.Teeth.SelectMany(x => x.AllPoints))
+            //{
+            //    Canvas.DrawDot(point, Brushes.Red);
+            //}
 
             Canvas.Children.Add(path);
         }

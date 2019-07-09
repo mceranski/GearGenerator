@@ -7,11 +7,10 @@ using GearGenerator.Models;
 
 namespace GearGenerator.ViewModels
 {
-    //Drawing a gear: http://www.cartertools.com/involute.html
-    //Gear Generator Online: https://geargenerator.com
     public class GearViewModel : ViewModel
     {
         public Gear Model { get; }
+        public List<Tooth> Teeth { get; } = new List<Tooth>();
 
         public GearViewModel()
         {
@@ -33,6 +32,9 @@ namespace GearGenerator.ViewModels
         public double BaseRadius => Model.BaseRadius;
         public double FCB => Model.FCB;
 
+        /// <summary>
+        /// The X position of the center of the circle
+        /// </summary>
         private double _centerX;
         public double CenterX
         {
@@ -44,6 +46,9 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        /// <summary>
+        /// The Y position of the center of the circle
+        /// </summary>
         private double _centerY;
         public double CenterY
         {
@@ -55,7 +60,10 @@ namespace GearGenerator.ViewModels
             }
         }
 
-        public int Teeth
+        /// <summary>
+        /// The number of teeth that the gear will have
+        /// </summary>
+        public int NumberOfTeeth
         {
             get => Model.NumberOfTeeth;
             set
@@ -85,12 +93,15 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Returns a GeometryGroup that can be used in a Path object to draw the gear
+        /// </summary>
         public GeometryGroup GearGeometry
         {
             get
             {
+                Teeth.Clear();
                 var geoGroup = new GeometryGroup();
-                var teeth = new List<Tooth>();
                 var angle = 0d;
                 while (angle < 360d)
                 {
@@ -98,7 +109,7 @@ namespace GearGenerator.ViewModels
                     using (var gc = toothGeometry.Open())
                     {
                         var tooth = CreateTooth(angle);
-                        teeth.Add(tooth);
+                        Teeth.Add(tooth);
                         gc.BeginFigure(tooth.PrimaryPoints.First(), false, false);
                         gc.PolyLineTo(tooth.PrimaryPoints, true, true);
                         gc.LineTo(tooth.MirrorPoints.First(), true, true);
@@ -109,15 +120,15 @@ namespace GearGenerator.ViewModels
                 }
 
                 //connect the bottoms of the teeth
-                for (var i = 0; i < teeth.Count; i++)
+                for (var i = 0; i < Teeth.Count; i++)
                 {
-                    var startPt = teeth[i].PrimaryPoints.First();
-                    var endPt = (i == teeth.Count - 1 ? teeth.First() : teeth[i + 1]).MirrorPoints.Last();
+                    var startPt = Teeth[i].PrimaryPoints.First();
+                    var endPt = (i == Teeth.Count - 1 ? Teeth.First() : Teeth[i + 1]).MirrorPoints.Last();
                     var g = new StreamGeometry();
                     using (var gc = g.Open())
                     {
                         gc.BeginFigure(startPt, false, false);
-                        gc.LineTo(endPt, true, false);
+                        gc.ArcTo(endPt, new Size(RootRadius, RootRadius), 0, false, SweepDirection.Clockwise, true, true);
                     }
                     geoGroup.Children.Add(g);
                 }
@@ -129,6 +140,11 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Draw the tooth using involute curves and by finding the intersection points of the various radii
+        /// </summary>
+        /// <param name="startAngle">The angle that is used to start drawing the tooth</param>
+        /// <returns>A tooth which is a collection of X,Y coordinates</returns>
         private Tooth CreateTooth(double startAngle)
         {
             var involutePoints = GetInvolutePoints(startAngle).ToList();
@@ -136,31 +152,27 @@ namespace GearGenerator.ViewModels
             //find where the involute point intersects with the pitch circle
             var pitchIntersect = FindIntersectionPoint(involutePoints, PitchRadius);
             involutePoints.Add(pitchIntersect);
-            var rootIntersect = FindIntersectionPoint(involutePoints, RootRadius);
-            involutePoints.Add(rootIntersect);
             var outerIntersect = FindIntersectionPoint(involutePoints, OutsideRadius);
             involutePoints.Add(outerIntersect);
+
+            var rootIntersect = GetPointOnCircle(startAngle, RootRadius);
+            involutePoints.Add(rootIntersect);
 
             var xDiff = pitchIntersect.X - CenterPoint.X;
             var yDiff = pitchIntersect.Y - CenterPoint.Y;
             var intersectAngle = Math.Atan2(yDiff, xDiff) * 180d / Math.PI;
-
             var delta = startAngle - intersectAngle;
 
             var offset1Degrees = intersectAngle - (Model.ToothSpacingDegrees * .25);
-            //var mirrorPoint = GetPointOnCircle(offset1Degrees, PitchRadius);
-            //DrawLine(CenterPoint, mirrorPoint, Brushes.Orange);
-
             var offset2Degrees = offset1Degrees - (Model.ToothSpacingDegrees * .25);
-            //var mirrorPoint2 = GetPointOnCircle(offset2Degrees, PitchRadius);
-            //DrawLine(CenterPoint, mirrorPoint2, Brushes.Blue);
 
+            
             var mirrorPoints = GetInvolutePoints(offset2Degrees - delta, true).ToList();
             var mirrorOuterIntersect = FindIntersectionPoint(mirrorPoints, OutsideRadius);
             mirrorPoints.Add(mirrorOuterIntersect);
             var mirrorPitchIntersect = FindIntersectionPoint(mirrorPoints, PitchRadius);
             mirrorPoints.Add(mirrorPitchIntersect);
-            var mirrorRootIntersect = FindIntersectionPoint(mirrorPoints, RootRadius);
+            var mirrorRootIntersect = GetPointOnCircle(offset2Degrees - delta, RootRadius);
             mirrorPoints.Add(mirrorRootIntersect);
 
             return new Tooth
@@ -170,22 +182,32 @@ namespace GearGenerator.ViewModels
             };
         }
 
+        /// <summary>
+        /// Determine whether or not the point is within the outside radius and the root radius. A fudge factor of 1% is used. 
+        /// </summary>
+        /// <param name="p">An X,Y coordinate</param>
+        /// <returns>True or false</returns>
         private bool IsPointApplicable(Point p)
         {
             var d = GetDistance(CenterPoint, p);
-            var threshold = OutsideRadius * .001;
             var deltaOuter = Math.Abs(d - OutsideRadius);
             var deltaInner = Math.Abs(d - RootRadius);
 
-            var outerOk = d <= OutsideRadius || deltaOuter <= threshold;
-            var innerOK = d >= RootRadius || deltaInner <= threshold;
+            var outerOk = d <= OutsideRadius || deltaOuter <= (OutsideRadius * .01);
+            var innerOk = d >= RootRadius || deltaInner <= (RootRadius * .01);
 
-            return innerOK && outerOk;
+            return innerOk && outerOk;
         }
 
+        /// <summary>
+        /// Draw lines tangent to the circle, the using a specified length find a point to establish an involute curve
+        /// </summary>
+        /// <param name="startAngle">The angle drawn from the center of the circle</param>
+        /// <param name="reverse">Set reverse to true to get the mirror of the involute curve</param>
+        /// <returns>A list of X,Y coordinates that draw the involute curve</returns>
         private IEnumerable<Point> GetInvolutePoints(double startAngle, bool reverse = false)
         {
-            const int intervalCount = 20;
+            const int intervalCount = 14;
             for (var i = 0; i < intervalCount; i++)
             {
                 var offsetDegrees = startAngle - (i * FCB) * (reverse ? -1 : 1);
@@ -208,6 +230,12 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Given an angle, find where a line would intersect with the edge of the circle
+        /// </summary>
+        /// <param name="angle">The angle drawn from the center of the circle</param>
+        /// <param name="radius">The radius of the circle</param>
+        /// <returns></returns>
         private Point GetPointOnCircle(double angle, double radius)
         {
             var radians = DegreesToRadians(angle);
@@ -216,6 +244,12 @@ namespace GearGenerator.ViewModels
             return new Point(x1, y1);
         }
 
+        /// <summary>
+        /// Given a bunch of points, get the first one that intersects with the edge of the circle
+        /// </summary>
+        /// <param name="points">A list of X,Y coordinates</param>
+        /// <param name="radius">The radius of the circle</param>
+        /// <returns>The intersection point</returns>
         private Point FindIntersectionPoint(IReadOnlyList<Point> points, double radius)
         {
             for (var i = 1; i < points.Count; i++)
@@ -232,17 +266,37 @@ namespace GearGenerator.ViewModels
             return CenterPoint;
         }
 
+        /// <summary>
+        /// Determines if a point is within a circle
+        /// </summary>
+        /// <param name="point">A X,Y coordinate</param>
+        /// <param name="radius">The radius of the circle</param>
+        /// <returns></returns>
         private bool IsInsideCircle(Point point, double radius)
         {
             return Math.Sqrt(Math.Pow((CenterPoint.X - point.X), 2d) +
                              Math.Pow((CenterPoint.Y - point.Y), 2d)) < radius;
         }
 
+        /// <summary>
+        /// Determine if a line intersections with the circle
+        /// </summary>
+        /// <param name="startPoint">The starting point of the line</param>
+        /// <param name="endPoint">The ending point of the line</param>
+        /// <param name="radius">The radius of a circle</param>
+        /// <returns>True/false if the line intersects with the circle</returns>
         private bool IsIntersecting(Point startPoint, Point endPoint, double radius)
         {
             return IsInsideCircle(startPoint, radius) ^ IsInsideCircle(endPoint, radius);
         }
 
+        /// <summary>
+        /// Find where a line intersects along a circle with a given radius
+        /// </summary>
+        /// <param name="startPoint">The starting point of the line</param>
+        /// <param name="endPoint">The ending point of the line</param>
+        /// <param name="radius">The radius of a circle</param>
+        /// <param name="intersection">The intersection point, it will return 0,0 if no intersection is found</param>
         private void FindIntersect(Point startPoint, Point endPoint, double radius, out Point intersection)
         {
             if (IsIntersecting(startPoint, endPoint, radius))
@@ -275,6 +329,12 @@ namespace GearGenerator.ViewModels
             intersection = new Point(0, 0);
         }
 
+        /// <summary>
+        /// Get the distance between two points
+        /// </summary>
+        /// <param name="p1">The starting point</param>
+        /// <param name="p2">The ending point</param>
+        /// <returns>The distance</returns>
         private static double GetDistance(Point p1, Point p2)
         {
             var deltaY = p2.Y - p1.Y;
@@ -284,6 +344,13 @@ namespace GearGenerator.ViewModels
 
         private static double DegreesToRadians(double degrees) => degrees * 0.01745329252;
 
+        /// <summary>
+        /// Given two points and a distance this method will return the X,Y location of the next point
+        /// </summary>
+        /// <param name="a">The starting point</param>
+        /// <param name="b">The ending point</param>
+        /// <param name="distance">Distance from ending point</param>
+        /// <returns>The resultant X,Y point</returns>
         private static Point CalculatePoint(Point a, Point b, double distance)
         {
             // a. calculate the vector from o to g:
