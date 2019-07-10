@@ -28,15 +28,6 @@ namespace GearGenerator.Views
             Slider.ValueChanged += (s,e) => ResizeCanvas();
         }
 
-        private void DrawGrid()
-        {
-            var brush = new DrawingBrush { TileMode = TileMode.Tile, Viewport = new Rect(0, 0, 10, 10), ViewportUnits = BrushMappingMode.Absolute };
-            var pen = new Pen { Brush = Brushes.Gray, Thickness = .5 };
-            var geo = new RectangleGeometry(new Rect(0, 0, 50, 50));
-            brush.Drawing = new GeometryDrawing { Pen = pen, Geometry = geo };
-            Canvas.Background = brush;
-        }
-
         private void Redraw()
         {
             Canvas.Children.Clear();
@@ -47,10 +38,6 @@ namespace GearGenerator.Views
         private void Draw()
         {
             Canvas.Children.Clear();
-
-            if( _viewModel.ShowGrid )
-                DrawGrid();
-
             DrawGear(_viewModel.Gear1);
         }
 

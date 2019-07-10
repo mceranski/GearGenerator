@@ -74,13 +74,38 @@
 
                 <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
-                    <Canvas x:Name="Canvas" 
-                            Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}"
-                            Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}">
-                        <Canvas.RenderTransform>
-                            <ScaleTransform ScaleY="{Binding ElementName=Slider, Path=Value}" ScaleX="{Binding ElementName=Slider, Path=Value}"/>
-                        </Canvas.RenderTransform>
-                    </Canvas>
+                    <Border>
+                        <Border.Background>
+                            <VisualBrush TileMode="Tile"
+                                         Viewport="0,0,25,25" ViewportUnits="Absolute" 
+                                         Viewbox="0,0,25,25" ViewboxUnits="Absolute">
+                                <VisualBrush.Visual>
+                                    <Rectangle Height="25" Width="25" StrokeDashArray="5 3" StrokeThickness=".25">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="False">
+                                                        <Setter Property="Stroke" Value="Transparent"></Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="True">
+                                                        <Setter Property="Stroke" Value="DimGray"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                            
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Border.Background>
+                        <Canvas x:Name="Canvas" 
+                                Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}"
+                                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}">
+                            <Canvas.RenderTransform>
+                                <ScaleTransform ScaleY="{Binding ElementName=Slider, Path=Value}" ScaleX="{Binding ElementName=Slider, Path=Value}"/>
+                            </Canvas.RenderTransform>
+                        </Canvas>
+                    </Border>
                 </ScrollViewer>
 
                 <DockPanel Grid.Row="2">

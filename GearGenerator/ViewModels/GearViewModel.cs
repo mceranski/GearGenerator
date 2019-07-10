@@ -21,8 +21,8 @@ namespace GearGenerator.ViewModels
                 PressureAngle = 27,
             };
 
-            CenterX = Model.OutsideRadius * 1.25;
-            CenterY = Model.OutsideRadius * 1.25;
+            CenterX = Model.OutsideRadius + 10;
+            CenterY = Model.OutsideRadius + 10;
         }
 
         public Point CenterPoint => new Point( CenterX, CenterY );
