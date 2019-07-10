@@ -1,19 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
 
 namespace GearGenerator.ViewModels
 {
     public class MainViewModel : ViewModel
     {
-        public GearViewModel Gear1 { get; }
-        public delegate void GearHandler(GearViewModel gear, PropertyChangedEventArgs args);
-        public GearHandler GearChanged { get; set; }
-
+        public ObservableCollection<GearViewModel> Gears { get; }
+        
         public MainViewModel()
         {
-            Gear1 = new GearViewModel();
-            Gear1.PropertyChanged += delegate(object sender, PropertyChangedEventArgs args)  {
-                GearChanged?.Invoke(Gear1, args);
-            };
+            Gears = new ObservableCollection<GearViewModel> {new GearViewModel()};
         }
 
         private bool _showGrid = true;

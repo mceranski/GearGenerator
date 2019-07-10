@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:gearGenerator="clr-namespace:GearGenerator"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         Title="Gear Generator" Height="700" Width="700">
@@ -15,32 +16,48 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="5"/>
-                        <ColumnDefinition Width="*" MinWidth="50"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="5"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="5"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="5"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <ItemsControl ItemsSource="{Binding Gears}" AlternationCount="1">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*" MinWidth="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="5"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="5"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="5"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                    <Label Content="Number of Teeth"/>
-                    <TextBox Grid.Column="2" Text="{Binding Gear1.NumberOfTeeth, Mode=TwoWay}"/>
+                                <TextBlock Grid.ColumnSpan="3" Padding="2" Background="LightGray" FontWeight="DemiBold">
+                                    <Run Text="Gear #"/>
+                                    <Run Text="{Binding AlternationIndex, RelativeSource={RelativeSource AncestorType=ItemsControl}, Mode=OneWay}"/>
+                                </TextBlock>
 
-                    <Label Grid.Row="2" Content="Pitch Diameter"/>
-                    <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding Gear1.PitchDiameter, Mode=TwoWay}"/>
+                                <Label Grid.Row="2" Content="Number of Teeth"/>
+                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
 
-                    <Label Grid.Row="4" Content="Pressure Angle"/>
-                    <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding Gear1.PressureAngle, Mode=TwoWay}"/>
-                </Grid>
+                                <Label Grid.Row="4" Content="Pitch Diameter"/>
+                                <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
 
+                                <Label Grid.Row="6" Content="Pressure Angle"/>
+                                <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
                 <Grid Margin="0,50,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -63,7 +80,6 @@
                     </CheckBox>
                 </Grid>
             </StackPanel>
-            
 
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
@@ -72,40 +88,71 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto">
-                    <Border>
-                        <Border.Background>
-                            <VisualBrush TileMode="Tile"
-                                         Viewport="0,0,25,25" ViewportUnits="Absolute" 
-                                         Viewbox="0,0,25,25" ViewboxUnits="Absolute">
-                                <VisualBrush.Visual>
-                                    <Rectangle Height="25" Width="25" StrokeDashArray="5 3" StrokeThickness=".25">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
+                <ScrollViewer 
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Gears}">
+                        
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Path Stroke="LightBlue" ToolTip="Outside">
+                                        <Path.Data>
+                                            <EllipseGeometry RadiusX="{Binding OutsideRadius}" RadiusY="{Binding OutsideRadius}" Center="{Binding CenterPoint}"/>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Stroke="LightGreen" ToolTip="Pitch">
+                                        <Path.Data>
+                                            <EllipseGeometry RadiusX="{Binding PitchRadius}" RadiusY="{Binding PitchRadius}" Center="{Binding CenterPoint}"/>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Stroke="LightCoral" ToolTip="Base">
+                                        <Path.Data>
+                                            <EllipseGeometry RadiusX="{Binding BaseRadius}" RadiusY="{Binding BaseRadius}"  Center="{Binding CenterPoint}"/>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Stroke="LightGray" ToolTip="Root">
+                                        <Path.Data>
+                                            <EllipseGeometry RadiusX="{Binding RootRadius}" RadiusY="{Binding RootRadius}" Center="{Binding CenterPoint}"/>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1">
+                                        <Path.RenderTransform>
+                                            <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>
+                                        </Path.RenderTransform>
+                                        <Path.Style>
+                                            <Style>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="False">
-                                                        <Setter Property="Stroke" Value="Transparent"></Setter>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="True">
-                                                        <Setter Property="Stroke" Value="DimGray"></Setter>
+                                                    <DataTrigger Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard TargetProperty="RenderTransform.Angle">
+                                                                    <DoubleAnimation From="0" To="360" RepeatBehavior="Forever" Duration="0:0:15" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard TargetProperty="RenderTransform.Angle">
+                                                                    <DoubleAnimation From="0" To="360" RepeatBehavior="Forever" Duration="0:0:0" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.ExitActions>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                            
-                                        </Rectangle.Style>
-                                    </Rectangle>
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Border.Background>
-                        <Canvas x:Name="Canvas" 
-                                Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}"
-                                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}">
-                            <Canvas.RenderTransform>
-                                <ScaleTransform ScaleY="{Binding ElementName=Slider, Path=Value}" ScaleX="{Binding ElementName=Slider, Path=Value}"/>
-                            </Canvas.RenderTransform>
-                        </Canvas>
-                    </Border>
+                                        </Path.Style>
+                                    </Path>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <gearGenerator:DrawingCanvas x:Name="ZoomCanvas" Background="Transparent"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </ScrollViewer>
 
                 <DockPanel Grid.Row="2">

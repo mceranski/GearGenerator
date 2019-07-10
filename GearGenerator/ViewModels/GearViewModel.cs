@@ -367,5 +367,13 @@ namespace GearGenerator.ViewModels
             // d. calculate and Draw the new vector,
             return new Point(a.X + vectorX, a.Y + vectorY);
         }
+
+        protected override void OnPropertyChanged(string propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+
+            if( propertyName != nameof(GearGeometry))
+                OnPropertyChanged(nameof(GearGeometry));
+        }
     }
 }

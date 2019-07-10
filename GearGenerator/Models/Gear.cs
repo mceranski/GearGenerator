@@ -42,6 +42,9 @@ namespace GearGenerator
         //The radial distance from the pitch circle to the top of the gear tooth
         public double Addendum => 1d / DiametralPitch;
 
+        //not sure if this is correct, this is the calculate for the radius at the bottom of the tooth
+        public double FilletRadius => .3 / DiametralPitch;
+
         //the dedendum (d) is computed differently for other pressure angles; see Machinery's Handbook for the correct formula
         //The radial distance from the pitch circle to the bottom of the tooth
         public double Dedendum => 1.157 / DiametralPitch;
