@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
+using System.Windows.Media;
 using GearGenerator.Helpers;
 
 namespace GearGenerator.ViewModels
@@ -20,13 +22,24 @@ namespace GearGenerator.ViewModels
 
         void Add()
         {
-
             var vm = new GearViewModel {
                 Name = $"Gear # {Gears.Count + 1}"
             };
-            var distance = Gears.Sum(x => x.OutsideRadius) + vm.OutsideRadius;
-            vm.CenterX = distance;
-            vm.CenterY = distance;
+
+            var xPos = Gears.Any() 
+                ? Gears.Last().CenterX + Gears.Last().PitchDiameter + 5
+                : vm.OutsideRadius * 1.25;
+
+            var yPos = Gears.Any() 
+                ? Gears.Last().CenterY - 10 
+                : vm.OutsideRadius * 1.25;
+
+            vm.SweepDirection = Gears.Count >= 1 
+                ? Gears[Gears.Count-1].SweepDirection == SweepDirection.Clockwise 
+                ? SweepDirection.Counterclockwise : SweepDirection.Clockwise : SweepDirection.Clockwise;
+
+            vm.CenterX = xPos;
+            vm.CenterY = yPos;
             Gears.Add( vm );
         }
 

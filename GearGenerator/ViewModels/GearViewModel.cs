@@ -21,9 +21,6 @@ namespace GearGenerator.ViewModels
                 NumberOfTeeth = 8,
                 PressureAngle = 27,
             };
-
-            CenterX = Model.OutsideRadius + 10;
-            CenterY = Model.OutsideRadius + 10;
         }
 
         public Point CenterPoint => new Point( CenterX, CenterY );
@@ -48,6 +45,7 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        public SweepDirection SweepDirection { get; set; } = SweepDirection.Clockwise;
         public Point CenterTop => new Point( CenterX, CenterY - OutsideRadius );
         public Point CenterBottom => new Point(CenterX, CenterY + OutsideRadius);
         public Point CenterLeft => new Point(CenterX - OutsideRadius, CenterY);
@@ -248,7 +246,7 @@ namespace GearGenerator.ViewModels
         {
             var radians = DegreesToRadians(angle);
             var x1 = CenterPoint.X + radius * Math.Cos(radians);
-            var y1 = CenterPoint.X + radius * Math.Sin(radians);
+            var y1 = CenterPoint.Y + radius * Math.Sin(radians);
             return new Point(x1, y1);
         }
 
