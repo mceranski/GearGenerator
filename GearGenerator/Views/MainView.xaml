@@ -6,7 +6,20 @@
         xmlns:gearGenerator="clr-namespace:GearGenerator"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
+        x:Name="Root"
         Title="Gear Generator" Height="700" Width="700">
+    <Window.Resources>
+        <Style TargetType="Path" x:Key="GuidelineStyle">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.ShowGuidelines, ElementName=Root}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataContext.ShowGuidelines, ElementName=Root}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid Margin="5">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -16,7 +29,13 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel>
-                <ItemsControl ItemsSource="{Binding Gears}" AlternationCount="1">
+                 <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource NoChromeButton}" Command="{Binding AddCommand}">
+                        <Image Source="../Images/add.png" Width="16"/>
+                    </Button>
+                </StackPanel>
+            
+                <ItemsControl ItemsSource="{Binding Gears}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel/>
@@ -24,7 +43,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid Margin="3">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="5"/>
@@ -40,11 +59,16 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.ColumnSpan="3" Padding="2" Background="LightGray" FontWeight="DemiBold">
-                                    <Run Text="Gear #"/>
-                                    <Run Text="{Binding AlternationIndex, RelativeSource={RelativeSource AncestorType=ItemsControl}, Mode=OneWay}"/>
-                                </TextBlock>
-
+                                <DockPanel Grid.ColumnSpan="3" Background="LightGray">
+                                    <Button DockPanel.Dock="Right" Margin="0,0,3,0"
+                                        Style="{StaticResource NoChromeButton}"
+                                        Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                        CommandParameter="{Binding}">
+                                        <Image Source="../Images/delete.png" Width="16"/>
+                                    </Button>
+                                    <TextBlock Padding="2" FontWeight="DemiBold" Text="{Binding Name}"/>
+                                </DockPanel>
+                                
                                 <Label Grid.Row="2" Content="Number of Teeth"/>
                                 <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
 
@@ -92,29 +116,37 @@
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Gears}">
-                        
-
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Path Stroke="LightBlue" ToolTip="Outside">
+                                    <Path Stroke="LightBlue" ToolTip="Outside" Style="{StaticResource GuidelineStyle}">
                                         <Path.Data>
                                             <EllipseGeometry RadiusX="{Binding OutsideRadius}" RadiusY="{Binding OutsideRadius}" Center="{Binding CenterPoint}"/>
                                         </Path.Data>
                                     </Path>
-                                    <Path Stroke="LightGreen" ToolTip="Pitch">
+                                    <Path Stroke="LightGreen" ToolTip="Pitch" Style="{StaticResource GuidelineStyle}">
                                         <Path.Data>
                                             <EllipseGeometry RadiusX="{Binding PitchRadius}" RadiusY="{Binding PitchRadius}" Center="{Binding CenterPoint}"/>
                                         </Path.Data>
                                     </Path>
-                                    <Path Stroke="LightCoral" ToolTip="Base">
+                                    <Path Stroke="LightCoral" ToolTip="Base" Style="{StaticResource GuidelineStyle}">
                                         <Path.Data>
                                             <EllipseGeometry RadiusX="{Binding BaseRadius}" RadiusY="{Binding BaseRadius}"  Center="{Binding CenterPoint}"/>
                                         </Path.Data>
                                     </Path>
-                                    <Path Stroke="LightGray" ToolTip="Root">
+                                    <Path Stroke="LightGray" ToolTip="Root" Style="{StaticResource GuidelineStyle}">
                                         <Path.Data>
                                             <EllipseGeometry RadiusX="{Binding RootRadius}" RadiusY="{Binding RootRadius}" Center="{Binding CenterPoint}"/>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
+                                        <Path.Data>
+                                            <LineGeometry StartPoint="{Binding CenterTop}" EndPoint="{Binding CenterBottom}"></LineGeometry>
+                                        </Path.Data>
+                                    </Path>
+                                    <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
+                                        <Path.Data>
+                                            <LineGeometry StartPoint="{Binding CenterLeft}" EndPoint="{Binding CenterRight}"></LineGeometry>
                                         </Path.Data>
                                     </Path>
                                     <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1">
@@ -149,7 +181,18 @@
                         </ItemsControl.ItemTemplate>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <gearGenerator:DrawingCanvas x:Name="ZoomCanvas" Background="Transparent"/>
+                                <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
+                                    <gearGenerator:DrawingCanvas.Style >
+                                        <Style TargetType="{x:Type gearGenerator:DrawingCanvas}">
+                                            <Setter Property="Background" Value="{StaticResource GridBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ShowGrid}" Value="False">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </gearGenerator:DrawingCanvas.Style>
+                                </gearGenerator:DrawingCanvas>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>

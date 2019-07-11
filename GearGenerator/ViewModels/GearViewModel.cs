@@ -9,6 +9,7 @@ namespace GearGenerator.ViewModels
 {
     public class GearViewModel : ViewModel
     {
+        public string Name { get; set; }
         public Gear Model { get; }
         public List<Tooth> Teeth { get; } = new List<Tooth>();
 
@@ -43,8 +44,14 @@ namespace GearGenerator.ViewModels
             {
                 _centerX = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CenterPoint));
             }
         }
+
+        public Point CenterTop => new Point( CenterX, CenterY - OutsideRadius );
+        public Point CenterBottom => new Point(CenterX, CenterY + OutsideRadius);
+        public Point CenterLeft => new Point(CenterX - OutsideRadius, CenterY);
+        public Point CenterRight => new Point(CenterX + OutsideRadius, CenterY);
 
         /// <summary>
         /// The Y position of the center of the circle
@@ -57,6 +64,7 @@ namespace GearGenerator.ViewModels
             {
                 _centerY = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CenterPoint));
             }
         }
 

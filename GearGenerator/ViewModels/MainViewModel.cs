@@ -1,14 +1,38 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
+using GearGenerator.Helpers;
 
 namespace GearGenerator.ViewModels
 {
     public class MainViewModel : ViewModel
     {
         public ObservableCollection<GearViewModel> Gears { get; }
+        public RelayCommand AddCommand { get; }
+        public RelayCommand<GearViewModel> RemoveCommand { get; }
         
         public MainViewModel()
         {
-            Gears = new ObservableCollection<GearViewModel> {new GearViewModel()};
+            Gears = new ObservableCollection<GearViewModel>();
+            AddCommand = new RelayCommand(Add);
+            RemoveCommand = new RelayCommand<GearViewModel>(Remove);
+            Add();
+        }
+
+        void Add()
+        {
+
+            var vm = new GearViewModel {
+                Name = $"Gear # {Gears.Count + 1}"
+            };
+            var distance = Gears.Sum(x => x.OutsideRadius) + vm.OutsideRadius;
+            vm.CenterX = distance;
+            vm.CenterY = distance;
+            Gears.Add( vm );
+        }
+
+        void Remove(GearViewModel gear)
+        {
+            Gears.Remove(gear);
         }
 
         private bool _showGrid = true;
