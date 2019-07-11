@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using GearGenerator.Models;
 
 namespace GearGenerator.ViewModels
@@ -98,6 +99,8 @@ namespace GearGenerator.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public string Description => Model.ToString();
 
         /// <summary>
         /// Returns a GeometryGroup that can be used in a Path object to draw the gear

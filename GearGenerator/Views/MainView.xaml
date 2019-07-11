@@ -29,7 +29,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel>
-                 <StackPanel Orientation="Horizontal">
+                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                     <Button Style="{StaticResource NoChromeButton}" Command="{Binding AddCommand}">
                         <Image Source="../Images/add.png" Width="16"/>
                     </Button>
@@ -59,15 +59,25 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <DockPanel Grid.ColumnSpan="3" Background="LightGray">
-                                    <Button DockPanel.Dock="Right" Margin="0,0,3,0"
-                                        Style="{StaticResource NoChromeButton}"
-                                        Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-                                        CommandParameter="{Binding}">
-                                        <Image Source="../Images/delete.png" Width="16"/>
-                                    </Button>
+                                <Grid Grid.ColumnSpan="3" Background="LightGray" ToolTip="{Binding Description}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
                                     <TextBlock Padding="2" FontWeight="DemiBold" Text="{Binding Name}"/>
-                                </DockPanel>
+                                    
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button
+                                            Style="{StaticResource NoChromeButton}"
+                                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                            CommandParameter="{Binding}">
+                                            <Image Source="../Images/delete.png" Width="16"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+
                                 
                                 <Label Grid.Row="2" Content="Number of Teeth"/>
                                 <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
@@ -149,7 +159,7 @@
                                             <LineGeometry StartPoint="{Binding CenterLeft}" EndPoint="{Binding CenterRight}"></LineGeometry>
                                         </Path.Data>
                                     </Path>
-                                    <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1">
+                                    <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1" ToolTip="{Binding Description, Mode=OneWay}">
                                         <Path.RenderTransform>
                                             <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>
                                         </Path.RenderTransform>
@@ -162,18 +172,10 @@
                                                             <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Clockwise}"/>
                                                         </MultiDataTrigger.Conditions>
                                                         <MultiDataTrigger.EnterActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard TargetProperty="RenderTransform.Angle">
-                                                                    <DoubleAnimation From="0" To="360" RepeatBehavior="Forever" Duration="0:0:15" />
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
+                                                            <BeginStoryboard Storyboard="{StaticResource ClockwiseRotation}" x:Name="StartClockwiseRotation"/>
                                                         </MultiDataTrigger.EnterActions>
                                                         <MultiDataTrigger.ExitActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard TargetProperty="RenderTransform.Angle">
-                                                                    <DoubleAnimation From="0" To="360" RepeatBehavior="Forever" Duration="0:0:0" />
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
+                                                            <PauseStoryboard BeginStoryboardName="StartClockwiseRotation"/>
                                                         </MultiDataTrigger.ExitActions>
                                                     </MultiDataTrigger>
                                                     <MultiDataTrigger>
@@ -182,18 +184,10 @@
                                                             <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Counterclockwise}"/>
                                                         </MultiDataTrigger.Conditions>
                                                         <MultiDataTrigger.EnterActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard TargetProperty="RenderTransform.Angle">
-                                                                    <DoubleAnimation From="360" To="0" RepeatBehavior="Forever" Duration="0:0:15" />
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
+                                                            <BeginStoryboard Storyboard="{StaticResource CounterClockwiseRotation}" x:Name="StartCounterClockwiseRotation"/>
                                                         </MultiDataTrigger.EnterActions>
                                                         <MultiDataTrigger.ExitActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard TargetProperty="RenderTransform.Angle">
-                                                                    <DoubleAnimation From="360" To="0" RepeatBehavior="Forever" Duration="0:0:0" />
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
+                                                            <PauseStoryboard BeginStoryboardName="StartCounterClockwiseRotation"/>
                                                         </MultiDataTrigger.ExitActions>
                                                     </MultiDataTrigger>
                                                 </Style.Triggers>

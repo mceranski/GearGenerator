@@ -40,4 +40,11 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Storyboard x:Key="ClockwiseRotation" TargetProperty="RenderTransform.Angle">
+        <DoubleAnimation From="0" To="360" RepeatBehavior="Forever" Duration="0:0:15" />
+    </Storyboard>
+    <Storyboard x:Key="CounterClockwiseRotation" TargetProperty="RenderTransform.Angle">
+        <DoubleAnimation From="360" To="0" RepeatBehavior="Forever" Duration="0:0:15" />
+    </Storyboard>
 </ResourceDictionary>
