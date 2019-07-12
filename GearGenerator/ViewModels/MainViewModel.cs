@@ -32,11 +32,11 @@ namespace GearGenerator.ViewModels
 
             var xPos = Gears.Any() 
                 ? Gears.Last().CenterX + Gears.Last().PitchDiameter + 5
-                : vm.OutsideRadius * 1.25;
+                : vm.OutsideRadius + 50;
 
             var yPos = Gears.Any() 
                 ? Gears.Last().CenterY - 10 
-                : vm.OutsideRadius * 1.25;
+                : vm.OutsideRadius + 50;
 
             vm.SweepDirection = Gears.Count >= 1 
                 ? Gears[Gears.Count-1].SweepDirection == SweepDirection.Clockwise 
