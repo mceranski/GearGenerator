@@ -58,6 +58,7 @@
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\RelayCommandGeneric.cs" />
     <Compile Include="Helpers\VisualTreeUtils.cs" />
+    <Compile Include="Services\WindowManager.cs" />
     <Compile Include="ViewModels\GearViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Models\Tooth.cs" />

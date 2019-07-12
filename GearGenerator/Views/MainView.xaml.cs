@@ -14,9 +14,9 @@ namespace GearGenerator.Views
         public MainView()
         {
             InitializeComponent();
-            this.DataContext = new MainViewModel();
+            DataContext = new MainViewModel();
 
-            this.Loaded += delegate(object sender, RoutedEventArgs args)
+            Loaded += delegate
             {
                 var canvas = VisualTreeUtils.FindChild<DrawingCanvas>(Application.Current.MainWindow, "ZoomCanvas");
                 Slider.ValueChanged += (o, eventArgs) => canvas.InvalidateMeasure();

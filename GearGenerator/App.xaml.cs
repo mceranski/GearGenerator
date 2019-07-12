@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using GearGenerator.Services;
 
 namespace GearGenerator
 {
@@ -7,6 +8,6 @@ namespace GearGenerator
     /// </summary>
     public partial class App : Application
     {
-
+        public static WindowManager WindowManager = new WindowManager();
     }
 }

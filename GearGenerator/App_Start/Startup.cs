@@ -1,6 +1,4 @@
 ﻿using System;
-using GearGenerator.ViewModels;
-using GearGenerator.Views;
 
 namespace GearGenerator
 {
@@ -12,8 +10,7 @@ namespace GearGenerator
             var app = new App();
             app.Startup += (sender, args) =>
             {
-                var mainView = new MainView{ DataContext = new MainViewModel()};
-                mainView.Show();
+                App.WindowManager.StartUp();
             };
 
             app.InitializeComponent();

@@ -20,215 +20,248 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    <Grid Margin="5">
-        <Grid>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Menu>
+            <MenuItem Header="File" InputGestureText="Alt+F">
+                <MenuItem Header="Exit" InputGestureText="Alt+F4" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="3"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel>
-                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Style="{StaticResource NoChromeButton}" Command="{Binding AddCommand}">
-                        <Image Source="../Images/add.png" Width="16"/>
-                    </Button>
-                </StackPanel>
-            
-                <ItemsControl ItemsSource="{Binding Gears}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="5"/>
-                                    <ColumnDefinition Width="*" MinWidth="50"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="5"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="5"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="5"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.ColumnSpan="3" Background="LightGray" ToolTip="{Binding Description}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="5"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock Padding="2" FontWeight="DemiBold" Text="{Binding Name}"/>
-                                    
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                                        <Button
-                                            Style="{StaticResource NoChromeButton}"
-                                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-                                            CommandParameter="{Binding}">
-                                            <Image Source="../Images/delete.png" Width="16"/>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-
-                                
-                                <Label Grid.Row="2" Content="Number of Teeth"/>
-                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
-
-                                <Label Grid.Row="4" Content="Pitch Diameter"/>
-                                <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
-
-                                <Label Grid.Row="6" Content="Pressure Angle"/>
-                                <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                
-                <Grid Margin="0,50,0,0">
+            <Border BorderThickness="1" BorderBrush="Black">
+                <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="5"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <CheckBox IsChecked="{Binding ShowGrid, UpdateSourceTrigger=PropertyChanged}">
-                        <TextBlock Text="Show Grid"/>
-                    </CheckBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource NoChromeButton}" Command="{Binding AddCommand}">
+                            <Image Source="../Images/add.png" Width="16"/>
+                        </Button>
+                    </StackPanel>
 
-                    <CheckBox Grid.Row="2" IsChecked="{Binding ShowGuidelines, UpdateSourceTrigger=PropertyChanged}">
-                        <TextBlock Text="Show Guidelines"/>
-                    </CheckBox>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Gears}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="50"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                    <CheckBox Grid.Row="4" IsChecked="{Binding UseAnimation, UpdateSourceTrigger=PropertyChanged}">
-                        <TextBlock Text="Animate"/>
-                    </CheckBox>
-                </Grid>
-            </StackPanel>
+                                        <Grid Grid.ColumnSpan="3" Background="LightGray" ToolTip="{Binding Description}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                                            <TextBlock Padding="2" FontWeight="DemiBold" Text="{Binding Name}"/>
 
-                <ScrollViewer 
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Gears}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Path Stroke="LightBlue" ToolTip="Outside" Style="{StaticResource GuidelineStyle}">
-                                        <Path.Data>
-                                            <EllipseGeometry RadiusX="{Binding OutsideRadius}" RadiusY="{Binding OutsideRadius}" Center="{Binding CenterPoint}"/>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Stroke="LightGreen" ToolTip="Pitch" Style="{StaticResource GuidelineStyle}">
-                                        <Path.Data>
-                                            <EllipseGeometry RadiusX="{Binding PitchRadius}" RadiusY="{Binding PitchRadius}" Center="{Binding CenterPoint}"/>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Stroke="LightCoral" ToolTip="Base" Style="{StaticResource GuidelineStyle}">
-                                        <Path.Data>
-                                            <EllipseGeometry RadiusX="{Binding BaseRadius}" RadiusY="{Binding BaseRadius}"  Center="{Binding CenterPoint}"/>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Stroke="LightGray" ToolTip="Root" Style="{StaticResource GuidelineStyle}">
-                                        <Path.Data>
-                                            <EllipseGeometry RadiusX="{Binding RootRadius}" RadiusY="{Binding RootRadius}" Center="{Binding CenterPoint}"/>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
-                                        <Path.Data>
-                                            <LineGeometry StartPoint="{Binding CenterTop}" EndPoint="{Binding CenterBottom}"></LineGeometry>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
-                                        <Path.Data>
-                                            <LineGeometry StartPoint="{Binding CenterLeft}" EndPoint="{Binding CenterRight}"></LineGeometry>
-                                        </Path.Data>
-                                    </Path>
-                                    <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1" ToolTip="{Binding Description, Mode=OneWay}">
-                                        <Path.RenderTransform>
-                                            <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>
-                                        </Path.RenderTransform>
-                                        <Path.Style>
-                                            <Style>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button
+                                                Style="{StaticResource NoChromeButton}"
+                                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                                CommandParameter="{Binding}">
+                                                    <Image Source="../Images/delete.png" Width="16"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Label Grid.Row="2" Content="Number of Teeth"/>
+                                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
+
+                                        <Label Grid.Row="4" Content="Pitch Diameter"/>
+                                        <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
+
+                                        <Label Grid.Row="6" Content="Pressure Angle"/>
+                                        <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox IsChecked="{Binding ShowGrid, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock Text="Show Grid"/>
+                        </CheckBox>
+
+                        <CheckBox Grid.Row="2" IsChecked="{Binding ShowGuidelines, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock Text="Show Guidelines"/>
+                        </CheckBox>
+
+                        <CheckBox Grid.Row="4" IsChecked="{Binding UseAnimation, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock Text="Animate"/>
+                        </CheckBox>
+                    </Grid>
+            </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="LightGray"/>
+
+            <Border BorderThickness="1" BorderBrush="Black" Grid.Column="2">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer 
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Gears}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Path Stroke="LightBlue" ToolTip="Outside" Style="{StaticResource GuidelineStyle}">
+                                            <Path.Data>
+                                                <EllipseGeometry RadiusX="{Binding OutsideRadius}" RadiusY="{Binding OutsideRadius}" Center="{Binding CenterPoint}"/>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Stroke="LightGreen" ToolTip="Pitch" Style="{StaticResource GuidelineStyle}">
+                                            <Path.Data>
+                                                <EllipseGeometry RadiusX="{Binding PitchRadius}" RadiusY="{Binding PitchRadius}" Center="{Binding CenterPoint}"/>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Stroke="LightCoral" ToolTip="Base" Style="{StaticResource GuidelineStyle}">
+                                            <Path.Data>
+                                                <EllipseGeometry RadiusX="{Binding BaseRadius}" RadiusY="{Binding BaseRadius}"  Center="{Binding CenterPoint}"/>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Stroke="LightGray" ToolTip="Root" Style="{StaticResource GuidelineStyle}">
+                                            <Path.Data>
+                                                <EllipseGeometry RadiusX="{Binding RootRadius}" RadiusY="{Binding RootRadius}" Center="{Binding CenterPoint}"/>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
+                                            <Path.Data>
+                                                <LineGeometry StartPoint="{Binding CenterTop}" EndPoint="{Binding CenterBottom}"></LineGeometry>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Stroke="DimGray" Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4">
+                                            <Path.Data>
+                                                <LineGeometry StartPoint="{Binding CenterLeft}" EndPoint="{Binding CenterRight}"></LineGeometry>
+                                            </Path.Data>
+                                        </Path>
+                                        <Path Data="{Binding GearGeometry}" Stroke="Black" StrokeThickness="1" ToolTip="{Binding Description, Mode=OneWay}">
+                                            <Path.RenderTransform>
+                                                <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>
+                                            </Path.RenderTransform>
+                                            <Path.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
+                                                                <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Clockwise}"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <MultiDataTrigger.EnterActions>
+                                                                <BeginStoryboard Storyboard="{StaticResource ClockwiseRotation}" x:Name="StartClockwiseRotation"/>
+                                                            </MultiDataTrigger.EnterActions>
+                                                            <MultiDataTrigger.ExitActions>
+                                                                <PauseStoryboard BeginStoryboardName="StartClockwiseRotation"/>
+                                                            </MultiDataTrigger.ExitActions>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
+                                                                <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Counterclockwise}"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <MultiDataTrigger.EnterActions>
+                                                                <BeginStoryboard Storyboard="{StaticResource CounterClockwiseRotation}" x:Name="StartCounterClockwiseRotation"/>
+                                                            </MultiDataTrigger.EnterActions>
+                                                            <MultiDataTrigger.ExitActions>
+                                                                <PauseStoryboard BeginStoryboardName="StartCounterClockwiseRotation"/>
+                                                            </MultiDataTrigger.ExitActions>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
+                                        <gearGenerator:DrawingCanvas.Style >
+                                            <Style TargetType="{x:Type gearGenerator:DrawingCanvas}">
+                                                <Setter Property="Background" Value="{StaticResource GridBrush}"/>
                                                 <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
-                                                            <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Clockwise}"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <MultiDataTrigger.EnterActions>
-                                                            <BeginStoryboard Storyboard="{StaticResource ClockwiseRotation}" x:Name="StartClockwiseRotation"/>
-                                                        </MultiDataTrigger.EnterActions>
-                                                        <MultiDataTrigger.ExitActions>
-                                                            <PauseStoryboard BeginStoryboardName="StartClockwiseRotation"/>
-                                                        </MultiDataTrigger.ExitActions>
-                                                    </MultiDataTrigger>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
-                                                            <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Counterclockwise}"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <MultiDataTrigger.EnterActions>
-                                                            <BeginStoryboard Storyboard="{StaticResource CounterClockwiseRotation}" x:Name="StartCounterClockwiseRotation"/>
-                                                        </MultiDataTrigger.EnterActions>
-                                                        <MultiDataTrigger.ExitActions>
-                                                            <PauseStoryboard BeginStoryboardName="StartCounterClockwiseRotation"/>
-                                                        </MultiDataTrigger.ExitActions>
-                                                    </MultiDataTrigger>
+                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="False">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </Path.Style>
-                                    </Path>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
-                                    <gearGenerator:DrawingCanvas.Style >
-                                        <Style TargetType="{x:Type gearGenerator:DrawingCanvas}">
-                                            <Setter Property="Background" Value="{StaticResource GridBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ShowGrid}" Value="False">
-                                                    <Setter Property="Background" Value="Transparent"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </gearGenerator:DrawingCanvas.Style>
-                                </gearGenerator:DrawingCanvas>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
-                </ScrollViewer>
+                                        </gearGenerator:DrawingCanvas.Style>
+                                    </gearGenerator:DrawingCanvas>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
 
-                <DockPanel Grid.Row="2">
-                    <TextBlock Text="{Binding ElementName=Slider, Path=Value, StringFormat={}{0:P0}}" DockPanel.Dock="Right"/>
+                    <DockPanel Grid.Row="2">
+                        <TextBlock Text="{Binding ElementName=Slider, Path=Value, StringFormat={}{0:P0}}" DockPanel.Dock="Right"/>
 
-                    <Slider x:Name="Slider"
-                                Maximum="5" 
-                                Minimum=".25" 
-                                Value="1"
-                                Foreground="Black"
-                                IsSnapToTickEnabled="True"
-                                TickPlacement="BottomRight"
-                                Ticks=".25, .5, .75, 1, 2, 3, 4, 5" />
-                </DockPanel>
-            </Grid>
+                        <Slider x:Name="Slider"
+                                    Maximum="5" 
+                                    Minimum=".25" 
+                                    Value="{Binding ZoomValue, UpdateSourceTrigger=PropertyChanged}"
+                                    Foreground="Black"
+                                    IsSnapToTickEnabled="True"
+                                    TickPlacement="BottomRight"
+                                    Ticks=".25, .5, .75, 1, 2, 3, 4, 5">
+                            <Slider.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Reset Zoom" Command="{Binding ResetZoomCommand}"/>
+                                </ContextMenu>
+                            </Slider.ContextMenu>
+                        </Slider>
+                    </DockPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

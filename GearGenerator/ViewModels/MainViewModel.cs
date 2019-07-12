@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization.Formatters;
 using System.Windows.Media;
 using GearGenerator.Helpers;
 
@@ -11,12 +11,16 @@ namespace GearGenerator.ViewModels
         public ObservableCollection<GearViewModel> Gears { get; }
         public RelayCommand AddCommand { get; }
         public RelayCommand<GearViewModel> RemoveCommand { get; }
+        public RelayCommand ResetZoomCommand { get; }
+        public RelayCommand ExitCommand { get; }
         
         public MainViewModel()
         {
             Gears = new ObservableCollection<GearViewModel>();
             AddCommand = new RelayCommand(Add);
             RemoveCommand = new RelayCommand<GearViewModel>(Remove);
+            ResetZoomCommand = new RelayCommand(() => ZoomValue = 1);
+            ExitCommand = new RelayCommand(() => App.WindowManager.Shutdown());
             Add();
         }
 
@@ -77,6 +81,17 @@ namespace GearGenerator.ViewModels
             set
             {
                 _useAnimation = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _zoomValue = 1d;
+        public double ZoomValue
+        {
+            get => _zoomValue;
+            set
+            {
+                _zoomValue = value;
                 OnPropertyChanged();
             }
         }
