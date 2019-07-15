@@ -195,36 +195,12 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
-                                        <Path ToolTip="Outside" Style="{StaticResource GuidelineStyle}">
-                                            <Path.Data>
-                                                <EllipseGeometry RadiusX="{Binding OutsideRadius}" RadiusY="{Binding OutsideRadius}" Center="{Binding CenterPoint}"/>
-                                            </Path.Data>
-                                        </Path>
-                                        <Path ToolTip="Pitch" Style="{StaticResource GuidelineStyle}">
-                                            <Path.Data>
-                                                <EllipseGeometry RadiusX="{Binding PitchRadius}" RadiusY="{Binding PitchRadius}" Center="{Binding CenterPoint}"/>
-                                            </Path.Data>
-                                        </Path>
-                                        <Path ToolTip="Base" Style="{StaticResource GuidelineStyle}">
-                                            <Path.Data>
-                                                <EllipseGeometry RadiusX="{Binding BaseRadius}" RadiusY="{Binding BaseRadius}"  Center="{Binding CenterPoint}"/>
-                                            </Path.Data>
-                                        </Path>
-                                        <Path ToolTip="Root" Style="{StaticResource GuidelineStyle}">
-                                            <Path.Data>
-                                                <EllipseGeometry RadiusX="{Binding RootRadius}" RadiusY="{Binding RootRadius}" Center="{Binding CenterPoint}"/>
-                                            </Path.Data>
-                                        </Path>
-                                        <Path Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4" StrokeThickness="1">
-                                            <Path.Data>
-                                                <LineGeometry StartPoint="{Binding CenterTop}" EndPoint="{Binding CenterBottom}"></LineGeometry>
-                                            </Path.Data>
-                                        </Path>
-                                        <Path Style="{StaticResource GuidelineStyle}" StrokeDashArray="2, 4, 2, 4" StrokeThickness="1">
-                                            <Path.Data>
-                                                <LineGeometry StartPoint="{Binding CenterLeft}" EndPoint="{Binding CenterRight}"></LineGeometry>
-                                            </Path.Data>
-                                        </Path>
+                                        <Path ToolTip="Outside" Data="{Binding OutsideCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
+                                        <Path ToolTip="Pitch" Data="{Binding PitchCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
+                                        <Path ToolTip="Base" Data="{Binding BaseCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
+                                        <Path ToolTip="Root" Data="{Binding RootCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
+                                        <Path ToolTip="Bore" Data="{Binding BoreCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
+                                        <Path Data="{Binding GuidelineGeometry}"  Style="{StaticResource GuidelineStyle}" StrokeDashArray="4 2"/>
                                         <Path Data="{Binding GearGeometry}" Stroke="DimGray"  StrokeThickness="1" ToolTip="{Binding Description, Mode=OneWay}">
                                             <Path.RenderTransform>
                                                 <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>

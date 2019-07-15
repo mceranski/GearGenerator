@@ -84,6 +84,9 @@ namespace GearGenerator.ViewModels
             get => _showGuidelines;
             set
             {
+                foreach (var gear in Gears)
+                    gear.ShowGuidelines = value;
+
                 _showGuidelines = value;
                 OnPropertyChanged();
             }

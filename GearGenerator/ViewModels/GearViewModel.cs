@@ -99,6 +99,17 @@ namespace GearGenerator.ViewModels
             }
         }
 
+        private bool _showGuidelines;
+        public bool ShowGuidelines
+        {
+            get => _showGuidelines;
+            set
+            {
+                _showGuidelines = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string Description => $"{Name}\r\n--------------------------------\r\n{Model}";
 
         /// <summary>
@@ -109,7 +120,7 @@ namespace GearGenerator.ViewModels
             get
             {
                 Teeth.Clear();
-                var geoGroup = new GeometryGroup();
+                var group = new GeometryGroup();
                 var angle = 0d;
                 while (angle < 360d)
                 {
@@ -123,7 +134,7 @@ namespace GearGenerator.ViewModels
                         gc.LineTo(tooth.MirrorPoints.First(), true, true);
                         gc.PolyLineTo(tooth.MirrorPoints, true, true);
                         angle += Model.ToothSpacingDegrees;
-                        geoGroup.Children.Add(toothGeometry);
+                        group.Children.Add(toothGeometry);
                     }
                 }
 
@@ -138,13 +149,36 @@ namespace GearGenerator.ViewModels
                         gc.BeginFigure(startPt, false, false);
                         gc.ArcTo(endPt, new Size(RootRadius, RootRadius), 0, false, SweepDirection.Clockwise, true, true);
                     }
-                    geoGroup.Children.Add(g);
+                    group.Children.Add(g);
                 }
 
-                var boreGeo = new EllipseGeometry(CenterPoint, OutsideRadius * .25, OutsideRadius * .25);
-                geoGroup.Children.Add(boreGeo);
+                var boreCircle = new EllipseGeometry(CenterPoint, OutsideRadius * .25, OutsideRadius * .25);
+                group.Children.Add(boreCircle);
 
-                return geoGroup;
+                return group;
+            }
+        }
+
+        private EllipseGeometry GetCircleGeometry( double radius ) => new EllipseGeometry(CenterPoint, radius, radius);
+        public EllipseGeometry OutsideCircleGeometry => GetCircleGeometry(OutsideRadius);
+        public EllipseGeometry PitchCircleGeometry => GetCircleGeometry(PitchRadius);
+        public EllipseGeometry BaseCircleGeometry => GetCircleGeometry(BaseRadius);
+        public EllipseGeometry RootCircleGeometry => GetCircleGeometry(RootRadius);
+        public EllipseGeometry BoreCircleGeometry => GetCircleGeometry(OutsideRadius * .25);
+
+        public GeometryGroup GuidelineGeometry
+        {
+            get
+            {
+                var group = new GeometryGroup();
+                
+                var verticalLine = new LineGeometry(CenterTop, CenterBottom);
+                group.Children.Add(verticalLine);
+
+                var horizontalLine = new LineGeometry(CenterLeft, CenterRight);
+                group.Children.Add(horizontalLine);
+
+                return group;
             }
         }
 
