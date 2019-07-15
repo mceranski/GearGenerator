@@ -37,8 +37,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Menu IsMainMenu="True" Style="{x:Null}">
+        <Menu IsMainMenu="True">
             <MenuItem Header="_File">
+                <MenuItem Header="Print" InputGestureText="Ctrl+P" Command="{Binding PrintCommand}" x:Name="mnuPrint">
+                    <MenuItem.Icon>
+                        <iconPacks:PackIconMaterial Kind="Printer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="Exit" InputGestureText="Alt+F4" Command="{Binding ExitCommand}">
                     <MenuItem.Icon>
                         <iconPacks:PackIconMaterial Kind="ExitToApp" VerticalAlignment="Center" HorizontalAlignment="Center"/>

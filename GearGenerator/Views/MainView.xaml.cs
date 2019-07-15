@@ -21,6 +21,8 @@ namespace GearGenerator.Views
                 var canvas = VisualTreeUtils.FindChild<DrawingCanvas>(Application.Current.MainWindow, "ZoomCanvas");
                 Slider.ValueChanged += (o, eventArgs) => canvas.InvalidateMeasure();
 
+                mnuPrint.CommandParameter = canvas;
+
                 var scaleTransform = new ScaleTransform();
                 BindingOperations.SetBinding( scaleTransform, ScaleTransform.ScaleXProperty, new Binding { Source = Slider, Path = new PropertyPath("Value") });
                 BindingOperations.SetBinding( scaleTransform, ScaleTransform.ScaleYProperty, new Binding { Source = Slider, Path = new PropertyPath("Value") });

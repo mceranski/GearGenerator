@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using GearGenerator.Helpers;
 
@@ -12,6 +13,7 @@ namespace GearGenerator.ViewModels
         public RelayCommand AddCommand { get; }
         public RelayCommand<GearViewModel> RemoveCommand { get; }
         public RelayCommand ResetZoomCommand { get; }
+        public RelayCommand<Canvas> PrintCommand { get; }
         public RelayCommand ExitCommand { get; }
         
         public MainViewModel()
@@ -20,8 +22,21 @@ namespace GearGenerator.ViewModels
             AddCommand = new RelayCommand(Add);
             RemoveCommand = new RelayCommand<GearViewModel>(Remove);
             ResetZoomCommand = new RelayCommand(() => ZoomValue = 1);
+            PrintCommand = new RelayCommand<Canvas>(Print);
             ExitCommand = new RelayCommand(() => App.WindowManager.Shutdown());
             Add();
+        }
+
+        private void Print( Canvas canvas )
+        {
+            var printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() != true) return;
+            var pageSize = new Size(printDialog.PrintableAreaWidth, printDialog.PrintableAreaHeight);
+            canvas.Measure(pageSize);
+            canvas.Arrange(new Rect(5, 5, pageSize.Width, pageSize.Height));
+
+            if (printDialog.ShowDialog() != true) return;
+            printDialog.PrintVisual(canvas, "Printing Canvas");
         }
 
         void Add()
