@@ -57,7 +57,7 @@ namespace GearGenerator
         public double RootDiameter => (NumberOfTeeth -2) / DiametralPitch;
         public double RootRadius => RootDiameter / 2d;
 
-        static double DegreesToRadians(double degrees)
+        private static double DegreesToRadians(double degrees)
         {
             return degrees * 0.0174533;
         }

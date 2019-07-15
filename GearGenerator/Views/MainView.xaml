@@ -93,6 +93,8 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="5"/>
                                             <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
                                         <Grid Grid.ColumnSpan="3" Background="LightGray" ToolTip="{Binding Description}">
@@ -122,6 +124,24 @@
 
                                         <Label Grid.Row="6" Content="Pressure Angle"/>
                                         <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
+
+                                        <Grid Grid.Row="8" Grid.ColumnSpan="3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Label Content="X"/>
+                                            <TextBox Grid.Column="2" Text="{Binding CenterX, Mode=TwoWay}"/>
+
+                                            <Label Grid.Column="4" Content="Y"/>
+                                            <TextBox Grid.Column="6" Text="{Binding CenterY, Mode=TwoWay}"/>
+                                        </Grid>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

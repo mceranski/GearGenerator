@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using GearGenerator.Models;
 
 namespace GearGenerator.ViewModels
@@ -100,7 +99,7 @@ namespace GearGenerator.ViewModels
             }
         }
 
-        public string Description => Model.ToString();
+        public string Description => $"{Name}\r\n--------------------------------\r\n{Model}";
 
         /// <summary>
         /// Returns a GeometryGroup that can be used in a Path object to draw the gear
@@ -226,14 +225,10 @@ namespace GearGenerator.ViewModels
                 var v = CenterPoint - point;
                 var perpendicular = reverse ? new Vector(-v.Y, v.X) : new Vector(v.Y, -v.X);
                 var tangentPoint = new Point(point.X + perpendicular.X, point.Y + perpendicular.Y);
-                //DrawLine(point, tangentPoint, Brushes.Purple, .5);
 
                 //using a arc length, find a point a given distance from the tangent point
                 var arcLength = (2 * Math.PI * BaseRadius) * ((i * (FCB)) / 360d);
                 var pt = CalculatePoint(point, tangentPoint, arcLength);
-
-                //var distance = GetDistance(pt, CenterPoint);
-                //if (distance > OutsideRadius) { DrawDot(pt, Brushes.Red);}
 
                 yield return pt;
             }

@@ -31,7 +31,7 @@ namespace GearGenerator.ViewModels
             };
 
             var xPos = Gears.Any() 
-                ? Gears.Last().CenterX + Gears.Last().PitchDiameter + 5
+                ? Gears.Last().CenterX + Gears.Last().PitchDiameter
                 : vm.OutsideRadius + 50;
 
             var yPos = Gears.Any() 
