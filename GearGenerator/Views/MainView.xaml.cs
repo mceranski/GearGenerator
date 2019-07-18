@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using GearGenerator.Controls;
 
@@ -24,6 +25,7 @@ namespace GearGenerator.Views
             _gears = new List<GearControl>();
             AnimateCheckbox.IsChecked = false;
             GuidelinesCheckbox.IsChecked = true;
+            ShowGridCheckbox.IsChecked = true;
             AddGear(this, EventArgs.Empty);
         }
 
@@ -34,10 +36,21 @@ namespace GearGenerator.Views
                 NumberOfTeeth = numberOfTeeth,
                 PitchDiameter = pitchDiameter,
                 PressureAngle = pressureAngle,
-                Opacity = .5
+                Fill = Brushes.Silver,
+                GuidelineColor = Brushes.DimGray,
             };
 
-            var gears = ZoomCanvas.Children.Cast<GearControl>().ToList();
+            control.SetValue(Panel.ZIndexProperty, 1);
+
+            control.MouseDown += delegate (object sender, MouseButtonEventArgs args)
+            {
+                PropertyEditor.DataContext = control;
+                args.Handled = true;
+            };
+
+            var gears = ZoomCanvas.Children.OfType<GearControl>().ToList();
+
+            control.Title = $"Gear #{gears.Count+1}";
 
             var xPos = gears.Any()
                 ? gears.Last().CenterPoint.X + gears.Last().PitchDiameter
@@ -56,6 +69,7 @@ namespace GearGenerator.Views
                 : SweepDirection.Clockwise;
 
             _gears.Add(control);
+
             ZoomCanvas.Children.Add(control);
         }
 
@@ -103,6 +117,11 @@ namespace GearGenerator.Views
         private void Guidelines_Checked(object sender, RoutedEventArgs e)
         {
             Apply(x => x.ShowGuidelines = GuidelinesCheckbox.IsChecked == true);
+        }
+
+        private void ShowGrid_Checked(object sender, RoutedEventArgs e)
+        {
+            ZoomCanvas.ShowGrid = ShowGridCheckbox.IsChecked == true;
         }
 
         private void Slider_ValueChanged(object sender, RoutedEventArgs e)

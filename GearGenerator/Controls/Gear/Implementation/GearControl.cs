@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +26,8 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty SweepDirectionProperty;
         public static readonly DependencyProperty AutoStartProperty;
         public static readonly DependencyProperty ShowGuidelinesProperty;
+        public static readonly DependencyProperty GuidelineColorProperty;
+        public static readonly DependencyProperty TitleProperty;
 
         private RotateTransform _renderTransform;
         private string _animationState = "Stopped";
@@ -45,6 +48,7 @@ namespace GearGenerator.Controls
         private EllipseGeometry _baseGeometry;
         private LineGeometry _horizontalLineGeometry;
         private LineGeometry _verticalLineGeometry;
+        private TextBlock _title;
 
         static GearControl()
         {
@@ -107,6 +111,18 @@ namespace GearGenerator.Controls
                     true,
                     FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     (o, args) => ((GearControl)o).ShowGuidelines = (bool)args.NewValue));
+
+            GuidelineColorProperty = DependencyProperty.RegisterAttached(nameof(GuidelineColor), typeof(Brush), typeof(GearControl),
+                new FrameworkPropertyMetadata(
+                    Brushes.DimGray,
+                    FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                    (o, args) => ((GearControl)o).GuidelineColor = (Brush)args.NewValue));
+
+            TitleProperty = DependencyProperty.RegisterAttached(nameof(Title), typeof(string), typeof(GearControl),
+                new FrameworkPropertyMetadata(
+                    "",
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                    (o, args) => ((GearControl)o).Title = (string)args.NewValue));
         }
 
         public override void OnApplyTemplate()
@@ -130,6 +146,8 @@ namespace GearGenerator.Controls
             _horizontalLineGeometry = GetTemplateChild("PART_HorizontalLineGeometry") as LineGeometry;
             _verticalLineGeometry = GetTemplateChild("PART_VerticalLineGeometry") as LineGeometry;
 
+            _title = GetTemplateChild("PART_Title") as TextBlock;
+
             var storyboard = new Storyboard { Duration = TimeSpan.FromSeconds(15) };
 
             var rotateAnimation = SweepDirection == SweepDirection.Clockwise 
@@ -152,19 +170,31 @@ namespace GearGenerator.Controls
         public int NumberOfTeeth
         {
             get => (int)GetValue(NumberOfTeethProperty);
-            set => SetValue(NumberOfTeethProperty, value);
+            set
+            {
+                SetValue(NumberOfTeethProperty, value);
+                Draw();
+            }
         }
 
         public double PressureAngle
         {
             get => (double)GetValue(PressureAngleProperty);
-            set => SetValue(PressureAngleProperty, value);
+            set
+            {
+                SetValue(PressureAngleProperty, value);
+                Draw();
+            }
         }
 
         public double PitchDiameter
         {
             get => (double)GetValue(PitchDiameterProperty);
-            set => SetValue(PitchDiameterProperty, value);
+            set
+            {
+                SetValue(PitchDiameterProperty, value);
+                Draw();
+            }
         }
 
         public Point CenterPoint
@@ -210,6 +240,8 @@ namespace GearGenerator.Controls
 
         public void Draw()
         {
+            if (_gearPath == null) return;
+
             var gear = new Gear
             {
                 NumberOfTeeth = NumberOfTeeth,
@@ -257,6 +289,26 @@ namespace GearGenerator.Controls
             _horizontalLineGeometry.EndPoint = new Point(CenterPoint.X + gear.OutsideRadius, CenterPoint.Y);
             _crosshairsPath.ToolTip = $"X: {CenterPoint.X} Y: {CenterPoint.Y}";
             _crosshairsPath.Visibility = guidelineVisibility;
+
+            var textSize = MeasureString(_title, Title);
+            _title.Text = Title;
+            _title.SetValue(Canvas.TopProperty, CenterPoint.Y - (textSize.Height / 2 ));
+            _title.SetValue(Canvas.LeftProperty, CenterPoint.X - (textSize.Width / 2 ));
+        }
+
+        private Size MeasureString(TextBlock textBlock, string candidate)
+        {
+            var formattedText = new FormattedText(
+                candidate,
+                CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(textBlock.FontFamily, textBlock.FontStyle, textBlock.FontWeight, textBlock.FontStretch),
+                textBlock.FontSize,
+                Brushes.Black,
+                new NumberSubstitution(),
+                TextFormattingMode.Display);
+
+            return new Size(formattedText.Width, formattedText.Height);
         }
 
         public double Angle
@@ -287,6 +339,12 @@ namespace GearGenerator.Controls
             set => SetValue(ShowGuidelinesProperty, value);
         }
 
+        public Brush GuidelineColor
+        {
+            get => (Brush)GetValue(GuidelineColorProperty);
+            set => SetValue(GuidelineColorProperty, value);
+        }
+
         public static void SetStroke(DependencyObject target, Stroke value) => target.SetValue(StrokeProperty, value);
         public static Brush GetStroke(DependencyObject target) => (Brush)target.GetValue(StrokeProperty);
 
@@ -300,6 +358,16 @@ namespace GearGenerator.Controls
         {
             get => (double)GetValue(StrokeThicknessProperty);
             set => SetValue(StrokeThicknessProperty, value);
+        }
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set
+            {
+                SetValue(TitleProperty, value);
+                Draw();
+            }
         }
 
         private Storyboard MyStoryboard => (Storyboard) Resources["Storyboard"];

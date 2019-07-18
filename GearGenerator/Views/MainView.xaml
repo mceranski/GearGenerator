@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:gearGenerator="clr-namespace:GearGenerator"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:localControls="clr-namespace:GearGenerator.Controls"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         x:Name="Root"
@@ -61,65 +61,34 @@
                         </Button>
                     </StackPanel>
 
-                    <!--
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Gears}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="3">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="5"/>
-                                            <ColumnDefinition Width="Auto" MinWidth="50"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="5"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="5"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="5"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                    <Grid Grid.Row="2" Margin="3" x:Name="PropertyEditor">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="Auto" MinWidth="50"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                                        <Grid Grid.ColumnSpan="3" Background="LightGray" ToolTip="{Binding Description}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="5"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Content="Title"/>
+                        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Title, Mode=TwoWay}"/>
 
-                                            <TextBlock Text="{Binding Name}" Padding="5"/>
+                        <Label Grid.Row="2" Content="Number of Teeth"/>
+                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
 
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="3" ToolTip="Delete">
-                                                <Button
-                                                    Style="{StaticResource NoChromeButton}"
-                                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-                                                    CommandParameter="{Binding}">
-                                                    <iconPacks:PackIconMaterial Kind="Delete" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
+                        <Label Grid.Row="4" Content="Pitch Diameter"/>
+                        <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
 
-                                        <Label Grid.Row="2" Content="Number of Teeth"/>
-                                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
-
-                                        <Label Grid.Row="4" Content="Pitch Diameter"/>
-                                        <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding PitchDiameter, Mode=TwoWay}"/>
-
-                                        <Label Grid.Row="6" Content="Pressure Angle"/>
-                                        <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                    -->
+                        <Label Grid.Row="6" Content="Pressure Angle"/>
+                        <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
+                    </Grid>
 
                     <Grid Grid.Row="4">
                         <Grid.RowDefinitions>
@@ -130,7 +99,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <CheckBox Grid.Row="0" IsChecked="{Binding ShowGrid, UpdateSourceTrigger=PropertyChanged}">
+                        <CheckBox Grid.Row="0" Click="ShowGrid_Checked" x:Name="ShowGridCheckbox">
                             <TextBlock Text="Show Grid"/>
                         </CheckBox>
 
@@ -158,13 +127,15 @@
                     <ScrollViewer 
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
-                            <gearGenerator:DrawingCanvas.RenderTransform>
+                        <localControls:DrawingCanvas 
+                            x:Name="ZoomCanvas"
+                            ShowGrid="True">
+                            <localControls:DrawingCanvas.RenderTransform>
                                 <ScaleTransform ScaleX="{Binding Value, ElementName=Slider}"
                                                 ScaleY="{Binding Value, ElementName=Slider}">
                                 </ScaleTransform>
-                            </gearGenerator:DrawingCanvas.RenderTransform>
-                        </gearGenerator:DrawingCanvas>
+                            </localControls:DrawingCanvas.RenderTransform>
+                        </localControls:DrawingCanvas>
                     </ScrollViewer>
 
                     <Grid Grid.Row="2">

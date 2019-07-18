@@ -6,11 +6,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:GearControl}">
-                    <Grid>
+                    <Canvas>
                         <Path
                             x:Name="PART_PitchCircle"
                             Panel.ZIndex="100"
-                            Stroke="Silver"
+                            Stroke="{TemplateBinding GuidelineColor}"
                             StrokeThickness=".8" >
                             <Path.Data>
                                 <EllipseGeometry x:Name="PART_PitchGeometry"/>
@@ -20,7 +20,7 @@
                         <Path
                             x:Name="PART_RootCircle"
                             Panel.ZIndex="100"
-                            Stroke="Silver" 
+                            Stroke="{TemplateBinding GuidelineColor}" 
                             StrokeThickness=".8" >
                             <Path.Data>
                                 <EllipseGeometry x:Name="PART_RootGeometry"/>
@@ -30,7 +30,7 @@
                         <Path
                             x:Name="PART_BaseCircle"
                             Panel.ZIndex="100"
-                            Stroke="Silver" 
+                            Stroke="{TemplateBinding GuidelineColor}" 
                             StrokeThickness=".8" >
                             <Path.Data>
                                 <EllipseGeometry x:Name="PART_BaseGeometry"/>
@@ -40,7 +40,7 @@
                         <Path
                             x:Name="PART_OutsideCircle"
                             Panel.ZIndex="100"
-                            Stroke="Silver" 
+                            Stroke="{TemplateBinding GuidelineColor}" 
                             StrokeThickness=".8" >
                             <Path.Data>
                                 <EllipseGeometry x:Name="PART_OutsideGeometry"/>
@@ -50,7 +50,7 @@
                         <Path
                             x:Name="PART_BoreCircle"
                             Panel.ZIndex="100"
-                            Stroke="Silver" 
+                            Stroke="{TemplateBinding GuidelineColor}" 
                             StrokeThickness=".8" >
                             <Path.Data>
                                 <EllipseGeometry x:Name="PART_BoreGeometry"/>
@@ -60,7 +60,7 @@
                         <Path
                             x:Name="PART_CrossHairs"
                             Panel.ZIndex="100"
-                            Stroke="Silver" 
+                            Stroke="{TemplateBinding GuidelineColor}" 
                             StrokeThickness="1" 
                             StrokeDashArray="4 1">
                             <Path.Data>
@@ -71,14 +71,21 @@
                             </Path.Data>
                         </Path>
 
+                        <TextBlock 
+                            x:Name="PART_Title"
+                            Panel.ZIndex="101"
+                            Foreground="Black"
+                            Text="{TemplateBinding Title}"/>
+
                         <Path
                             x:Name="PART_Gear" 
+                            Panel.ZIndex="1"
                             Fill="{TemplateBinding Fill}"
                             Opacity="{TemplateBinding Opacity}"
                             ToolTip="{TemplateBinding ToolTip}"
                             Stroke="{TemplateBinding Stroke}" 
                             StrokeThickness="{TemplateBinding StrokeThickness}"/>
-                    </Grid>
+                    </Canvas>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
