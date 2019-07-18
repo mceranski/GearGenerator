@@ -1,7 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using MahApps.Metro.Controls;
 
 namespace GearGenerator.Controls
 {
@@ -119,7 +121,7 @@ namespace GearGenerator.Controls
             size.Width = double.IsPositiveInfinity(availableSize.Width) ? childWidth : availableSize.Width;
             size.Height = double.IsPositiveInfinity(availableSize.Height) ? childHeight : availableSize.Height;
 
-            if (!(this.RenderTransform is ScaleTransform transform)) return size;
+            if (!(RenderTransform is ScaleTransform transform)) return size;
             size.Width *= transform.ScaleX;
             size.Height *= transform.ScaleY;
 

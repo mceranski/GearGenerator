@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -125,6 +126,35 @@ namespace GearGenerator.Controls
                     (o, args) => ((GearControl)o).Title = (string)args.NewValue));
         }
 
+        private Point? _dragStart;
+        public GearControl()
+        {
+            Loaded += delegate
+            {
+                MouseDown += delegate (object sender, MouseButtonEventArgs args)
+                {
+                    var element = (UIElement)sender;
+                    _dragStart = args.GetPosition(element);
+                    element.CaptureMouse();
+                };
+
+                MouseMove += delegate (object sender, MouseEventArgs args)
+                {
+                    if (_dragStart == null || args.LeftButton != MouseButtonState.Pressed) return;
+                    var p2 = args.GetPosition(this);
+                    CenterPoint = new Point(p2.X, p2.Y);
+                    Draw();
+                };
+
+                MouseUp += (sender, args) =>
+                {
+                    var element = (UIElement)sender;
+                    _dragStart = null;
+                    element.ReleaseMouseCapture();
+                };
+            };
+        }
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -241,6 +271,9 @@ namespace GearGenerator.Controls
         public void Draw()
         {
             if (_gearPath == null) return;
+
+            _renderTransform.CenterX = CenterPoint.X;
+            _renderTransform.CenterY = CenterPoint.Y;
 
             var gear = new Gear
             {
