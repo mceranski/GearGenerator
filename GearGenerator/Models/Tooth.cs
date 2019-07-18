@@ -2,7 +2,7 @@
 
 namespace GearGenerator.Models
 {
-    public struct Tooth
+    public class Tooth
     {
         public Point[] PrimaryPoints;
         public Point[] MirrorPoints;

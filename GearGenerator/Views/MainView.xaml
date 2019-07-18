@@ -1,11 +1,11 @@
-﻿<Controls:MetroWindow  x:Class="GearGenerator.Views.MainView"
+﻿<controls:MetroWindow  x:Class="GearGenerator.Views.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:gearGenerator="clr-namespace:GearGenerator"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         x:Name="Root"
@@ -16,21 +16,6 @@
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal" 
         TextOptions.TextRenderingMode="Auto">
-    <Window.Resources>
-        <Style TargetType="Path" x:Key="GuidelineStyle">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding DataContext.ShowGuidelines, ElementName=Root}" Value="True">
-                    <Setter Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding DataContext.ShowGuidelines, ElementName=Root}" Value="False">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                </DataTrigger>
-            </Style.Triggers>
-            <Setter Property="Stroke" Value="Silver"/>
-            <Setter Property="StrokeThickness" Value=".8"/>
-        </Style>
-    </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -39,13 +24,13 @@
 
         <Menu IsMainMenu="True">
             <MenuItem Header="_File">
-                <MenuItem Header="Print" InputGestureText="Ctrl+P" Command="{Binding PrintCommand}" x:Name="mnuPrint">
+                <MenuItem Header="Print" InputGestureText="Ctrl+P" Click="Print_OnClick">
                     <MenuItem.Icon>
                         <iconPacks:PackIconMaterial Kind="Printer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Exit" InputGestureText="Alt+F4" Command="{Binding ExitCommand}">
+                <MenuItem Header="Exit" InputGestureText="Alt+F4" Click="Exit_OnClick">
                     <MenuItem.Icon>
                         <iconPacks:PackIconMaterial Kind="ExitToApp" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </MenuItem.Icon>
@@ -71,11 +56,12 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource NoChromeButton}" Command="{Binding AddCommand}">
+                        <Button Style="{StaticResource NoChromeButton}" Click="AddGear">
                             <iconPacks:PackIconMaterial Kind="PlusCircleOutline" VerticalAlignment="Center" HorizontalAlignment="Center" />
                         </Button>
                     </StackPanel>
 
+                    <!--
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Gears}">
                             <ItemsControl.ItemsPanel>
@@ -92,8 +78,6 @@
                                             <ColumnDefinition Width="Auto" MinWidth="50"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="5"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="5"/>
                                             <RowDefinition Height="Auto"/>
@@ -130,29 +114,12 @@
 
                                         <Label Grid.Row="6" Content="Pressure Angle"/>
                                         <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
-
-                                        <Grid Grid.Row="8" Grid.ColumnSpan="3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="5"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="5"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="5"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Label Content="X"/>
-                                            <TextBox Grid.Column="2" Text="{Binding CenterX, Mode=TwoWay}"/>
-
-                                            <Label Grid.Column="4" Content="Y"/>
-                                            <TextBox Grid.Column="6" Text="{Binding CenterY, Mode=TwoWay}"/>
-                                        </Grid>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                    -->
 
                     <Grid Grid.Row="4">
                         <Grid.RowDefinitions>
@@ -167,11 +134,11 @@
                             <TextBlock Text="Show Grid"/>
                         </CheckBox>
 
-                        <CheckBox Grid.Row="2" IsChecked="{Binding ShowGuidelines, UpdateSourceTrigger=PropertyChanged}">
+                        <CheckBox Grid.Row="2" Click="Guidelines_Checked" x:Name="GuidelinesCheckbox">
                             <TextBlock Text="Show Guidelines"/>
                         </CheckBox>
 
-                        <CheckBox Grid.Row="4" IsChecked="{Binding UseAnimation, UpdateSourceTrigger=PropertyChanged}">
+                        <CheckBox Grid.Row="4" Click="Animate_Checked" x:Name="AnimateCheckbox">
                             <TextBlock Text="Animate"/>
                         </CheckBox>
                     </Grid>
@@ -191,71 +158,13 @@
                     <ScrollViewer 
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Gears}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Path ToolTip="Outside" Data="{Binding OutsideCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
-                                        <Path ToolTip="Pitch" Data="{Binding PitchCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
-                                        <Path ToolTip="Base" Data="{Binding BaseCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
-                                        <Path ToolTip="Root" Data="{Binding RootCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
-                                        <Path ToolTip="Bore" Data="{Binding BoreCircleGeometry}" Style="{StaticResource GuidelineStyle}"/>
-                                        <Path Data="{Binding GuidelineGeometry}"  Style="{StaticResource GuidelineStyle}" StrokeDashArray="4 2"/>
-                                        <Path Data="{Binding GearGeometry}" Stroke="DimGray"  StrokeThickness="1" ToolTip="{Binding Description, Mode=OneWay}">
-                                            <Path.RenderTransform>
-                                                <RotateTransform x:Name="MyAnimatedTransform" CenterY="{Binding CenterY}" CenterX="{Binding CenterX}" Angle="0"/>
-                                            </Path.RenderTransform>
-                                            <Path.Style>
-                                                <Style>
-                                                    <Style.Triggers>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
-                                                                <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Clockwise}"/>
-                                                            </MultiDataTrigger.Conditions>
-                                                            <MultiDataTrigger.EnterActions>
-                                                                <BeginStoryboard Storyboard="{StaticResource ClockwiseRotation}" x:Name="StartClockwiseRotation"/>
-                                                            </MultiDataTrigger.EnterActions>
-                                                            <MultiDataTrigger.ExitActions>
-                                                                <PauseStoryboard BeginStoryboardName="StartClockwiseRotation"/>
-                                                            </MultiDataTrigger.ExitActions>
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding DataContext.UseAnimation, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Value="True"/>
-                                                                <Condition Binding="{Binding SweepDirection}" Value="{x:Static SweepDirection.Counterclockwise}"/>
-                                                            </MultiDataTrigger.Conditions>
-                                                            <MultiDataTrigger.EnterActions>
-                                                                <BeginStoryboard Storyboard="{StaticResource CounterClockwiseRotation}" x:Name="StartCounterClockwiseRotation"/>
-                                                            </MultiDataTrigger.EnterActions>
-                                                            <MultiDataTrigger.ExitActions>
-                                                                <PauseStoryboard BeginStoryboardName="StartCounterClockwiseRotation"/>
-                                                            </MultiDataTrigger.ExitActions>
-                                                        </MultiDataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
-                                        <gearGenerator:DrawingCanvas.Style >
-                                            <Style TargetType="{x:Type gearGenerator:DrawingCanvas}">
-                                                <Setter Property="Background" Value="{StaticResource GridBrush}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowGrid}" Value="False">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </gearGenerator:DrawingCanvas.Style>
-                                    </gearGenerator:DrawingCanvas>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                        <gearGenerator:DrawingCanvas x:Name="ZoomCanvas">
+                            <gearGenerator:DrawingCanvas.RenderTransform>
+                                <ScaleTransform ScaleX="{Binding Value, ElementName=Slider}"
+                                                ScaleY="{Binding Value, ElementName=Slider}">
+                                </ScaleTransform>
+                            </gearGenerator:DrawingCanvas.RenderTransform>
+                        </gearGenerator:DrawingCanvas>
                     </ScrollViewer>
 
                     <Grid Grid.Row="2">
@@ -265,10 +174,12 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Slider x:Name="Slider"
+                        <Slider 
+                            x:Name="Slider"
+                            ValueChanged="Slider_ValueChanged"
                             Maximum="5" 
                             Minimum=".25" 
-                            Value="{Binding ZoomValue, UpdateSourceTrigger=PropertyChanged}"
+                            Value="1"
                             Foreground="Black"
                             IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight"
@@ -288,10 +199,9 @@
                             <iconPacks:PackIconMaterial Kind="MagnifyPlus" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0" />
                             <TextBlock Text="{Binding ElementName=Slider, Path=Value, StringFormat={}{0:P0}}" DockPanel.Dock="Right"/>
                         </StackPanel>
-                        
                     </Grid>
                 </Grid>
             </Border>
         </Grid>
     </Grid>
-</Controls:MetroWindow>
+</controls:MetroWindow>

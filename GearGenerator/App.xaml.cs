@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using GearGenerator.Services;
+﻿using System;
+using System.Windows;
 
 namespace GearGenerator
 {
@@ -8,6 +8,12 @@ namespace GearGenerator
     /// </summary>
     public partial class App : Application
     {
-        public static WindowManager WindowManager = new WindowManager();
+        [STAThread]
+        static void Main()
+        {
+            var app = new App();
+            app.InitializeComponent();
+            app.Run();
+        }
     }
 }

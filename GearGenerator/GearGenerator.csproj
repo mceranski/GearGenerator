@@ -69,15 +69,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App_Start\Startup.cs" />
-    <Compile Include="Helpers\RelayCommand.cs" />
-    <Compile Include="Helpers\RelayCommandGeneric.cs" />
-    <Compile Include="Helpers\VisualTreeUtils.cs" />
-    <Compile Include="Services\WindowManager.cs" />
-    <Compile Include="ViewModels\GearViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="Controls\Gear\Implementation\GearControl.cs" />
     <Compile Include="Models\Tooth.cs" />
-    <Compile Include="DrawingCanvas.cs" />
+    <Compile Include="Controls\DrawingCanvas\Implementation\DrawingCanvas.cs" />
+    <Page Include="Controls\Gear\Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -91,7 +89,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Models\Gear.cs" />
-    <Compile Include="ViewModels\ViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -125,14 +122,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\delete.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\add.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\information.png" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
