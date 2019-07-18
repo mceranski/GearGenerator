@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GearGenerator.Controls;
@@ -42,12 +41,6 @@ namespace GearGenerator.Views
 
             control.SetValue(Panel.ZIndexProperty, 1);
 
-            control.MouseDown += delegate (object sender, MouseButtonEventArgs args)
-            {
-                PropertyEditor.DataContext = control;
-                args.Handled = true;
-            };
-
             var gears = ZoomCanvas.Children.OfType<GearControl>().ToList();
 
             control.Title = $"Gear #{gears.Count+1}";
@@ -70,6 +63,9 @@ namespace GearGenerator.Views
 
             _gears.Add(control);
 
+            var item = new ListBoxItem {Content = control.Title, Tag = control};
+
+            GearList.Items.Add(item);
             ZoomCanvas.Children.Add(control);
         }
 

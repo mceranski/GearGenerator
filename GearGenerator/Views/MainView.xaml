@@ -50,6 +50,8 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="Auto"/>
@@ -61,7 +63,29 @@
                         </Button>
                     </StackPanel>
 
-                    <Grid Grid.Row="2" Margin="3" x:Name="PropertyEditor">
+                    <ListBox Grid.Row="2" x:Name="GearList" BorderThickness="1" BorderBrush="DimGray" MinHeight="100">
+                        <ListBox.Resources>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected"  Value="True">
+                                        <Setter Property="Foreground" Value="Blue"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.Resources>
+                    </ListBox>
+
+                    <Grid Grid.Row="4" Margin="3" x:Name="PropertyEditor" 
+                          DataContext="{Binding ElementName=GearList, Path=SelectedItem.Tag}">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=GearList, Path=SelectedItems.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="5"/>
@@ -77,8 +101,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Label Grid.Row="0" Content="Title"/>
-                        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Title, Mode=TwoWay}"/>
+                        <Label Grid.Row="0" Grid.ColumnSpan="3" Content="{Binding Title}"/>
 
                         <Label Grid.Row="2" Content="Number of Teeth"/>
                         <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
@@ -90,7 +113,7 @@
                         <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
                     </Grid>
 
-                    <Grid Grid.Row="4">
+                    <Grid Grid.Row="6">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="5"/>
