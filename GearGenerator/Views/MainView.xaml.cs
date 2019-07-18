@@ -126,10 +126,8 @@ namespace GearGenerator.Views
 
         private void Apply(Action<GearControl> action)
         {
-            foreach (var gear in _gears)
-            {
+            foreach (var gear in _gears) {
                 action.Invoke(gear);
-                gear.Draw();
             }
         }
 

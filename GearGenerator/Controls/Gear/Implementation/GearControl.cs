@@ -186,7 +186,7 @@ namespace GearGenerator.Controls
 
             rotateAnimation.RepeatBehavior = RepeatBehavior.Forever;
 
-            _renderTransform = new RotateTransform(Angle, CenterPoint.X, CenterPoint.Y);
+            _renderTransform = new RotateTransform(Angle);
 
             _gearPath.SetValue(RenderTransformProperty, _renderTransform);
             Storyboard.SetTarget(rotateAnimation, _gearPath);
@@ -200,37 +200,76 @@ namespace GearGenerator.Controls
         public int NumberOfTeeth
         {
             get => (int)GetValue(NumberOfTeethProperty);
-            set
-            {
-                SetValue(NumberOfTeethProperty, value);
-                Draw();
-            }
+            set => SetValueEx(NumberOfTeethProperty, value);
         }
 
         public double PressureAngle
         {
             get => (double)GetValue(PressureAngleProperty);
-            set
-            {
-                SetValue(PressureAngleProperty, value);
-                Draw();
-            }
+            set => SetValueEx(PressureAngleProperty, value);
         }
 
         public double PitchDiameter
         {
             get => (double)GetValue(PitchDiameterProperty);
-            set
-            {
-                SetValue(PitchDiameterProperty, value);
-                Draw();
-            }
+            set => SetValueEx(PitchDiameterProperty, value);
         }
 
         public Point CenterPoint
         {
             get => (Point)GetValue(CenterPointProperty);
-            set => SetValue(CenterPointProperty, value);
+            set => SetValueEx(CenterPointProperty, value);
+        }
+
+        public double Angle
+        {
+            get => (double)GetValue(AngleProperty);
+            set => SetValueEx(AngleProperty, value);
+        }
+
+        public SweepDirection SweepDirection
+        {
+            get => (SweepDirection)GetValue(SweepDirectionProperty);
+            set => SetValueEx(SweepDirectionProperty, value);
+        }
+
+        public bool AutoStart
+        {
+            get => (bool)GetValue(AutoStartProperty);
+            set => SetValue(AutoStartProperty, value);
+        }
+
+        public bool ShowGuidelines
+        {
+            get => (bool)GetValue(ShowGuidelinesProperty);
+            set => SetValueEx(ShowGuidelinesProperty, value);
+        }
+
+        public Brush GuidelineColor
+        {
+            get => (Brush)GetValue(GuidelineColorProperty);
+            set => SetValueEx(GuidelineColorProperty, value);
+        }
+
+        public static void SetStroke(DependencyObject target, Stroke value) => target.SetValue(StrokeProperty, value);
+        public static Brush GetStroke(DependencyObject target) => (Brush)target.GetValue(StrokeProperty);
+
+        public Brush Fill
+        {
+            get => (Brush)GetValue(FillProperty);
+            set => SetValue(FillProperty, value);
+        }
+
+        public double StrokeThickness
+        {
+            get => (double)GetValue(StrokeThicknessProperty);
+            set => SetValue(StrokeThicknessProperty, value);
+        }
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValueEx(TitleProperty, value);
         }
 
         private Geometry GetGearGeometry(Gear gear)
@@ -246,12 +285,12 @@ namespace GearGenerator.Controls
                 {
                     var tooth = CreateTooth(gear, angle);
 
-                    if( angle == 0 )
+                    if (angle == 0)
                         gc.BeginFigure(tooth.MirrorPoints.First(), true, false);
 
                     //connect the tooth to the previous tooth
                     var lastTooth = Teeth.LastOrDefault();
-                    if( lastTooth != null )
+                    if (lastTooth != null)
                         gc.ArcTo(lastTooth.PrimaryPoints.Last(), new Size(gear.RootRadius, gear.RootRadius), 0, false, SweepDirection.Clockwise, true, true);
 
                     Teeth.Add(tooth);
@@ -274,6 +313,7 @@ namespace GearGenerator.Controls
 
             _renderTransform.CenterX = CenterPoint.X;
             _renderTransform.CenterY = CenterPoint.Y;
+            _renderTransform.Angle = Angle;
 
             var gear = new Gear
             {
@@ -325,8 +365,8 @@ namespace GearGenerator.Controls
 
             var textSize = MeasureString(_title, Title);
             _title.Text = Title;
-            _title.SetValue(Canvas.TopProperty, CenterPoint.Y - (textSize.Height / 2 ));
-            _title.SetValue(Canvas.LeftProperty, CenterPoint.X - (textSize.Width / 2 ));
+            _title.SetValue(Canvas.TopProperty, CenterPoint.Y - (textSize.Height / 2));
+            _title.SetValue(Canvas.LeftProperty, CenterPoint.X - (textSize.Width / 2));
         }
 
         private Size MeasureString(TextBlock textBlock, string candidate)
@@ -342,65 +382,6 @@ namespace GearGenerator.Controls
                 TextFormattingMode.Display);
 
             return new Size(formattedText.Width, formattedText.Height);
-        }
-
-        public double Angle
-        {
-            get => (double)GetValue(AngleProperty);
-            set
-            {
-                SetValue(AngleProperty, value);
-                _renderTransform.Angle = value;
-            }
-        }
-
-        public SweepDirection SweepDirection
-        {
-            get => (SweepDirection)GetValue(SweepDirectionProperty);
-            set => SetValue(SweepDirectionProperty, value);
-        }
-
-        public bool AutoStart
-        {
-            get => (bool)GetValue(AutoStartProperty);
-            set => SetValue(AutoStartProperty, value);
-        }
-
-        public bool ShowGuidelines
-        {
-            get => (bool)GetValue(ShowGuidelinesProperty);
-            set => SetValue(ShowGuidelinesProperty, value);
-        }
-
-        public Brush GuidelineColor
-        {
-            get => (Brush)GetValue(GuidelineColorProperty);
-            set => SetValue(GuidelineColorProperty, value);
-        }
-
-        public static void SetStroke(DependencyObject target, Stroke value) => target.SetValue(StrokeProperty, value);
-        public static Brush GetStroke(DependencyObject target) => (Brush)target.GetValue(StrokeProperty);
-
-        public Brush Fill
-        {
-            get => (Brush)GetValue(FillProperty);
-            set => SetValue(FillProperty, value);
-        }
-
-        public double StrokeThickness
-        {
-            get => (double)GetValue(StrokeThicknessProperty);
-            set => SetValue(StrokeThicknessProperty, value);
-        }
-
-        public string Title
-        {
-            get => (string)GetValue(TitleProperty);
-            set
-            {
-                SetValue(TitleProperty, value);
-                Draw();
-            }
         }
 
         private Storyboard MyStoryboard => (Storyboard) Resources["Storyboard"];
@@ -650,6 +631,12 @@ namespace GearGenerator.Controls
 
             // d. calculate and Draw the new vector,
             return new Point(a.X + vectorX, a.Y + vectorY);
+        }
+
+        private void SetValueEx(DependencyProperty property, object value)
+        {
+            SetValue(property, value);
+            Draw();
         }
 
     }
