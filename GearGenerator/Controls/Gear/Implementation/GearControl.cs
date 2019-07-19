@@ -30,6 +30,7 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty GuidelineColorProperty;
         public static readonly DependencyProperty ShowTextOverlayProperty;
         public static readonly DependencyProperty NumberProperty;
+        public static readonly DependencyProperty RevolutionsPerMinuteProperty;
 
         private RotateTransform _renderTransform;
         private string _animationState = "Stopped";
@@ -131,35 +132,49 @@ namespace GearGenerator.Controls
                     true,
                     FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     (o, args) => ((GearControl)o).ShowTextOverlay = (bool)args.NewValue));
+
+            RevolutionsPerMinuteProperty = DependencyProperty.RegisterAttached(nameof(RevolutionsPerMinute), typeof(double), typeof(GearControl),
+                new FrameworkPropertyMetadata(
+                    4d,
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                    (o, args) => ((GearControl)o).RevolutionsPerMinute = (double)args.NewValue));
         }
 
-        private Point? _dragStart;
+        private Point _dragStart;
         public GearControl()
         {
             Loaded += delegate
             {
-                MouseDown += delegate (object sender, MouseButtonEventArgs args)
+                PreviewMouseLeftButtonDown += delegate (object sender, MouseButtonEventArgs args)
                 {
                     var element = (UIElement)sender;
                     _dragStart = args.GetPosition(element);
-                    element.CaptureMouse();
+                    //element.CaptureMouse();
                 };
 
-                MouseMove += delegate (object sender, MouseEventArgs args)
+                PreviewMouseMove += delegate (object sender, MouseEventArgs args)
                 {
-                    if (_dragStart == null || args.LeftButton != MouseButtonState.Pressed) return;
-                    var p2 = args.GetPosition(this);
-                    CenterPoint = new Point(p2.X, p2.Y);
-                    Draw();
-                };
+                    if (args.LeftButton != MouseButtonState.Pressed) return;
 
-                MouseUp += (sender, args) =>
-                {
-                    var element = (UIElement)sender;
-                    _dragStart = null;
-                    element.ReleaseMouseCapture();
+                    var dragEnd = args.GetPosition(this);
+
+                    //only drag when the user moved the mouse by a reasonable amount
+                    if (!IsMovementBigEnough(_dragStart, dragEnd)) return;
+
+                    Mouse.OverrideCursor = Cursors.Hand;
+
+                    //the difference between the start of the drag and end of the drag
+                    var delta = new Point(_dragStart.X - dragEnd.X, _dragStart.Y - dragEnd.Y);
+                    var target = new Point(_dragStart.X - delta.X, _dragStart.Y - delta.Y);
+                    CenterPoint = target;
                 };
             };
+        }
+
+        public static Boolean IsMovementBigEnough(Point initialMousePosition, Point currentPosition)
+        {
+            return (Math.Abs(currentPosition.X - initialMousePosition.X) >= SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(currentPosition.Y - initialMousePosition.Y) >= SystemParameters.MinimumVerticalDragDistance);
         }
 
         private Gear GetGear()
@@ -196,8 +211,12 @@ namespace GearGenerator.Controls
 
             _textOverlay = GetTemplateChild("PART_TextOverlay") as TextOnPathElement;
 
-            var storyboard = new Storyboard { Duration = TimeSpan.FromSeconds(15) };
-            storyboard.RepeatBehavior = RepeatBehavior.Forever;
+            var speedFactor = 60d / RevolutionsPerMinute;
+            var storyboard = new Storyboard
+            {
+                Duration = TimeSpan.FromSeconds(speedFactor),
+                RepeatBehavior = RepeatBehavior.Forever
+            };
 
             var rotateAnimation = SweepDirection == SweepDirection.Clockwise 
                 ? new DoubleAnimation(0, 360, storyboard.Duration) 
@@ -255,6 +274,12 @@ namespace GearGenerator.Controls
         {
             get => (bool)GetValue(AutoStartProperty);
             set => SetValue(AutoStartProperty, value);
+        }
+
+        public double RevolutionsPerMinute
+        {
+            get => (double)GetValue(RevolutionsPerMinuteProperty);
+            set => SetValueEx(RevolutionsPerMinuteProperty, value);
         }
 
         public bool ShowGuidelines

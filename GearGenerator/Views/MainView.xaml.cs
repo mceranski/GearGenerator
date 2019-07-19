@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using GearGenerator.Controls;
 
 namespace GearGenerator.Views
 {
-    /// <summary>
-    /// Interaction logic for MainView.xaml
-    /// </summary>
     public partial class MainView
     {
         private readonly List<GearControl> _gears;
-        //private Point? dragStart = null;
 
         public MainView()
         {
@@ -26,11 +23,14 @@ namespace GearGenerator.Views
             ShowGridCheckbox.IsChecked = true;
             TextOverlaysCheckbox.IsChecked = true;
 
-            AddGear(8, 200, 27, new Point(150,150));
-            AddGear(16, 400, 27, new Point(375,355));
+            var smallGear = AddGear(8, 200, 27, new Point(150,150));
+            smallGear.RevolutionsPerMinute = 6;
+
+            var largeGear = AddGear(16, 400, 27, new Point(375,356));
+            largeGear.RevolutionsPerMinute = 3;
         }
 
-        private void AddGear(int numberOfTeeth, double pitchDiameter, double pressureAngle, Point? centerPoint = null )
+        private GearControl AddGear( int numberOfTeeth, double pitchDiameter, double pressureAngle, Point? centerPoint = null )
         {
             var control = new GearControl
             {
@@ -38,7 +38,7 @@ namespace GearGenerator.Views
                 PitchDiameter = pitchDiameter,
                 PressureAngle = pressureAngle,
                 Fill = new LinearGradientBrush(Colors.LightGray, Colors.WhiteSmoke, new Point(0,0), new Point(1,0)),
-                GuidelineColor = Brushes.DimGray,
+                GuidelineColor = Brushes.DimGray
             };
 
             control.SetValue(Panel.ZIndexProperty, 1);
@@ -74,6 +74,18 @@ namespace GearGenerator.Views
             var index = GearList.Items.Add(item);
             GearList.SelectedIndex = index;
             ZoomCanvas.Children.Add(control);
+
+            control.PreviewMouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs args)
+            {
+                if (!(sender is GearControl gearControl)) return;
+                var selectedIndex = GearList.Items.Cast<ListBoxItem>()
+                    .Select((i, x) => Equals(i.Tag, gearControl) ? x : -1)
+                    .Max();
+
+                if( selectedIndex >= 0 ) GearList.SelectedIndex = selectedIndex;
+            };
+
+            return control;
         }
 
         private void AddGear(object sender, EventArgs e)
