@@ -116,14 +116,16 @@ namespace GearGenerator.Controls
                     childWidth = child.DesiredSize.Width;   //We will be stacking vertically.
                 }
                 childHeight += child.DesiredSize.Height;    //Total height needs to be summed up.
+
+                if (!(RenderTransform is ScaleTransform transform)) continue;
+                childWidth *= transform.ScaleX;
+                childHeight *= transform.ScaleY;
             }
 
             size.Width = double.IsPositiveInfinity(availableSize.Width) ? childWidth : availableSize.Width;
             size.Height = double.IsPositiveInfinity(availableSize.Height) ? childHeight : availableSize.Height;
 
-            if (!(RenderTransform is ScaleTransform transform)) return size;
-            size.Width *= transform.ScaleX;
-            size.Height *= transform.ScaleY;
+            
 
             return size;
         }

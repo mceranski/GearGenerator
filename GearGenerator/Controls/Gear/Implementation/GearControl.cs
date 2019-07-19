@@ -28,7 +28,8 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty AutoStartProperty;
         public static readonly DependencyProperty ShowGuidelinesProperty;
         public static readonly DependencyProperty GuidelineColorProperty;
-        public static readonly DependencyProperty TitleProperty;
+        public static readonly DependencyProperty ShowTextOverlayProperty;
+        public static readonly DependencyProperty NumberProperty;
 
         private RotateTransform _renderTransform;
         private string _animationState = "Stopped";
@@ -49,7 +50,7 @@ namespace GearGenerator.Controls
         private EllipseGeometry _baseGeometry;
         private LineGeometry _horizontalLineGeometry;
         private LineGeometry _verticalLineGeometry;
-        private TextBlock _title;
+        private TextOnPathElement _textOverlay;
 
         static GearControl()
         {
@@ -119,11 +120,17 @@ namespace GearGenerator.Controls
                     FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     (o, args) => ((GearControl)o).GuidelineColor = (Brush)args.NewValue));
 
-            TitleProperty = DependencyProperty.RegisterAttached(nameof(Title), typeof(string), typeof(GearControl),
+            NumberProperty = DependencyProperty.RegisterAttached(nameof(Number), typeof(int), typeof(GearControl),
                 new FrameworkPropertyMetadata(
-                    "",
+                    0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                    (o, args) => ((GearControl)o).Title = (string)args.NewValue));
+                    (o, args) => ((GearControl)o).Number = (int)args.NewValue));
+
+            ShowTextOverlayProperty = DependencyProperty.Register(nameof(ShowTextOverlay), typeof(bool), typeof(GearControl),
+                new FrameworkPropertyMetadata(
+                    false,
+                    FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                    (o, args) => ((GearControl)o).ShowTextOverlay = (bool)args.NewValue));
         }
 
         private Point? _dragStart;
@@ -155,6 +162,17 @@ namespace GearGenerator.Controls
             };
         }
 
+        private Gear GetGear()
+        {
+            return new Gear { NumberOfTeeth = NumberOfTeeth, PitchDiameter = PitchDiameter, PressureAngle = PressureAngle };
+        }
+
+        protected override Size MeasureOverride(Size constraint)
+        {
+            var gear = GetGear();
+            return new Size(CenterPoint.X + gear.OutsideRadius, CenterPoint.Y + gear.OutsideRadius);
+        }
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -176,7 +194,7 @@ namespace GearGenerator.Controls
             _horizontalLineGeometry = GetTemplateChild("PART_HorizontalLineGeometry") as LineGeometry;
             _verticalLineGeometry = GetTemplateChild("PART_VerticalLineGeometry") as LineGeometry;
 
-            _title = GetTemplateChild("PART_Title") as TextBlock;
+            _textOverlay = GetTemplateChild("PART_TextOverlay") as TextOnPathElement;
 
             var storyboard = new Storyboard { Duration = TimeSpan.FromSeconds(15) };
             storyboard.RepeatBehavior = RepeatBehavior.Forever;
@@ -251,6 +269,12 @@ namespace GearGenerator.Controls
             set => SetValueEx(GuidelineColorProperty, value);
         }
 
+        public bool ShowTextOverlay
+        {
+            get => (bool)GetValue(ShowTextOverlayProperty);
+            set => SetValue(ShowTextOverlayProperty, value);
+        }
+
         public static void SetStroke(DependencyObject target, Stroke value) => target.SetValue(StrokeProperty, value);
         public static Brush GetStroke(DependencyObject target) => (Brush)target.GetValue(StrokeProperty);
 
@@ -266,10 +290,10 @@ namespace GearGenerator.Controls
             set => SetValue(StrokeThicknessProperty, value);
         }
 
-        public string Title
+        public int Number
         {
-            get => (string)GetValue(TitleProperty);
-            set => SetValueEx(TitleProperty, value);
+            get => (int)GetValue(NumberProperty);
+            set => SetValueEx(NumberProperty, value);
         }
 
         private Geometry GetGearGeometry(Gear gear)
@@ -315,12 +339,7 @@ namespace GearGenerator.Controls
             _renderTransform.CenterY = CenterPoint.Y;
             _renderTransform.Angle = Angle;
 
-            var gear = new Gear
-            {
-                NumberOfTeeth = NumberOfTeeth,
-                PitchDiameter = PitchDiameter,
-                PressureAngle = PressureAngle
-            };
+            var gear = GetGear();
 
             var guidelineVisibility = ShowGuidelines ? Visibility.Visible : Visibility.Collapsed;
             _gearPath.ToolTip = gear.ToString();
@@ -363,11 +382,16 @@ namespace GearGenerator.Controls
             _crosshairsPath.ToolTip = $"X: {CenterPoint.X} Y: {CenterPoint.Y}";
             _crosshairsPath.Visibility = guidelineVisibility;
 
-            var textSize = MeasureString(_title, Title);
-            _title.Text = Title;
-            _title.SetValue(Canvas.TopProperty, CenterPoint.Y - (textSize.Height / 2));
-            _title.SetValue(Canvas.LeftProperty, CenterPoint.X - (textSize.Width / 2));
+            
+            _textOverlay.Text = OverlayText;
+            var textRadius = gear.PitchRadius * .5;
+            var figure = new PathFigure {StartPoint = new Point(CenterPoint.X - textRadius, CenterPoint.Y )};
+            figure.Segments.Add( new ArcSegment{ IsLargeArc = false, Point = new Point( CenterPoint.X + textRadius, CenterPoint.Y), Size = new Size(textRadius, textRadius), SweepDirection = SweepDirection.Clockwise });
+            _textOverlay.PathFigure = figure;
         }
+
+        public string OverlayText => $"#{Number} N={NumberOfTeeth} P={PitchDiameter} PA={PressureAngle}";
+        public string Title => $"Gear #{Number}";
 
         private Size MeasureString(TextBlock textBlock, string candidate)
         {

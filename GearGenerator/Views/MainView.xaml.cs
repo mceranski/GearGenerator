@@ -34,7 +34,7 @@ namespace GearGenerator.Views
                 NumberOfTeeth = numberOfTeeth,
                 PitchDiameter = pitchDiameter,
                 PressureAngle = pressureAngle,
-                Fill = new LinearGradientBrush(Colors.LightGray, Colors.DimGray, new Point(0,0), new Point(1,0)),
+                Fill = new LinearGradientBrush(Colors.LightGray, Colors.WhiteSmoke, new Point(0,0), new Point(1,0)),
                 GuidelineColor = Brushes.DimGray,
             };
 
@@ -42,7 +42,7 @@ namespace GearGenerator.Views
 
             var gears = ZoomCanvas.Children.OfType<GearControl>().ToList();
 
-            control.Title = $"Gear #{gears.Count+1}";
+            control.Number = gears.Count+1;
 
             var xPos = gears.Any()
                 ? gears.Last().CenterPoint.X + gears.Last().PitchDiameter
@@ -144,12 +144,7 @@ namespace GearGenerator.Views
         {
             var printDialog = new PrintDialog();
             if (printDialog.ShowDialog() != true) return;
-            var pageSize = new Size(printDialog.PrintableAreaWidth, printDialog.PrintableAreaHeight);
-            ZoomCanvas.Measure(pageSize);
-            ZoomCanvas.Arrange(new Rect(5, 5, pageSize.Width, pageSize.Height));
-
-            if (printDialog.ShowDialog() != true) return;
-            printDialog.PrintVisual(ZoomCanvas, "Printing Canvas");
+            VisualPrinter.PrintAcrossPages(printDialog, ZoomCanvas);
         }
 
         private void Exit_OnClick(object sender, RoutedEventArgs e)

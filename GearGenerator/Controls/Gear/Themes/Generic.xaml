@@ -71,11 +71,12 @@
                             </Path.Data>
                         </Path>
 
-                        <TextBlock 
-                            x:Name="PART_Title"
+                        <local:TextOnPathElement 
+                            x:Name="PART_TextOverlay"
+                            ContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                             Panel.ZIndex="101"
-                            Foreground="Black"
-                            Text="{TemplateBinding Title}"/>
+                            FontSize="12"
+                            Foreground="Black"/>
 
                         <Path
                             x:Name="PART_Gear" 
