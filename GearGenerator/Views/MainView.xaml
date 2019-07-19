@@ -45,7 +45,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border BorderThickness="1" BorderBrush="Black">
+            <Border BorderThickness="1" BorderBrush="{StaticResource ControlBorderBrush}">
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -68,7 +68,7 @@
                         x:Name="GearList"
                         SelectionMode="Single"
                         BorderThickness="1" 
-                        BorderBrush="DimGray" 
+                        BorderBrush="{StaticResource ControlBorderBrush}" 
                         MinHeight="100">
                         <ListBox.Resources>
                             <Style TargetType="{x:Type ListBoxItem}">
@@ -154,9 +154,9 @@
             </Grid>
             </Border>
 
-            <GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="LightGray"/>
+            <GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="{StaticResource NonActiveBorderColorBrush}"/>
 
-            <Border BorderThickness="1" BorderBrush="Black" Grid.Column="2">
+            <Border BorderThickness="1" BorderBrush="{StaticResource ControlBorderBrush}" Grid.Column="2">
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
