@@ -24,10 +24,12 @@ namespace GearGenerator.Views
             AnimateCheckbox.IsChecked = false;
             GuidelinesCheckbox.IsChecked = true;
             ShowGridCheckbox.IsChecked = true;
-            AddGear(this, EventArgs.Empty);
+
+            AddGear(8, 200, 27, new Point(150,150));
+            AddGear(16, 400, 27, new Point(375,355));
         }
 
-        private void AddGear(int numberOfTeeth, double pitchDiameter, double pressureAngle)
+        private void AddGear(int numberOfTeeth, double pitchDiameter, double pressureAngle, Point? centerPoint = null )
         {
             var control = new GearControl
             {
@@ -44,16 +46,21 @@ namespace GearGenerator.Views
 
             control.Number = gears.Count+1;
 
-            var xPos = gears.Any()
-                ? gears.Last().CenterPoint.X + gears.Last().PitchDiameter
-                : control.PitchDiameter;
+            if (centerPoint == null)
+            {
+                var xPos = gears.Any()
+                    ? gears.Last().CenterPoint.X + (gears.Last().PitchDiameter / 2) + (pitchDiameter / 2)
+                    : control.PitchDiameter;
 
-            var yPos = gears.Any()
-                ? gears.Last().CenterPoint.Y - 10
-                : control.PitchDiameter;
+                var yPos = gears.Any()
+                    ? gears.Last().CenterPoint.Y
+                    : control.PitchDiameter;
+
+                centerPoint = new Point(xPos, yPos);
+            }
 
             control.ShowGuidelines = true;
-            control.CenterPoint = new Point(xPos, yPos);
+            control.CenterPoint = centerPoint.Value;
             control.SweepDirection = gears.Count > 0
                 ? gears.Last().SweepDirection == SweepDirection.Clockwise
                     ? SweepDirection.Counterclockwise
@@ -68,34 +75,6 @@ namespace GearGenerator.Views
             ZoomCanvas.Children.Add(control);
         }
 
-        //private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    var element = (UIElement)sender;
-        //    dragStart = e.GetPosition(element);
-        //    element.CaptureMouse();
-        //}
-
-        //private void UIElement_OnMouseMove(object sender, MouseEventArgs e)
-        //{
-        //    if (_canvas == null) return;
-
-        //    if (dragStart == null || e.LeftButton != MouseButtonState.Pressed) return;
-        //    var element = (UIElement)sender;
-
-        //    var p2 = e.GetPosition(_canvas);
-
-        //    if (!(element is Grid grid)) return;
-        //    var gearVm = grid.DataContext as GearViewModel;
-        //    gearVm.CenterX = p2.X;
-        //    gearVm.CenterY = p2.Y;
-        //}
-
-        //private void UIElement_OnMouseUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    var element = (UIElement)sender;
-        //    dragStart = null;
-        //    element.ReleaseMouseCapture();
-        //}
         private void AddGear(object sender, EventArgs e)
         {
             AddGear(8, 200, 27);
