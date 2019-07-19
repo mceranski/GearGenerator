@@ -179,13 +179,13 @@ namespace GearGenerator.Controls
             _title = GetTemplateChild("PART_Title") as TextBlock;
 
             var storyboard = new Storyboard { Duration = TimeSpan.FromSeconds(15) };
+            storyboard.RepeatBehavior = RepeatBehavior.Forever;
 
             var rotateAnimation = SweepDirection == SweepDirection.Clockwise 
                 ? new DoubleAnimation(0, 360, storyboard.Duration) 
                 : new DoubleAnimation(360, 0, storyboard.Duration);
 
-            rotateAnimation.RepeatBehavior = RepeatBehavior.Forever;
-
+            rotateAnimation.RepeatBehavior = storyboard.RepeatBehavior;
             _renderTransform = new RotateTransform(Angle);
 
             _gearPath.SetValue(RenderTransformProperty, _renderTransform);

@@ -51,7 +51,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="25"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="Auto"/>
@@ -63,19 +63,25 @@
                         </Button>
                     </StackPanel>
 
-                    <ListBox Grid.Row="2" x:Name="GearList" BorderThickness="1" BorderBrush="DimGray" MinHeight="100">
+                    <ListBox 
+                        Grid.Row="2" 
+                        x:Name="GearList"
+                        SelectionMode="Single"
+                        BorderThickness="1" 
+                        BorderBrush="DimGray" 
+                        MinHeight="100">
                         <ListBox.Resources>
                             <Style TargetType="{x:Type ListBoxItem}">
                                 <Style.Triggers>
                                     <Trigger Property="IsSelected"  Value="True">
-                                        <Setter Property="Foreground" Value="Blue"/>
+                                        <Setter Property="Foreground" Value="{StaticResource BlackBrush}"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </ListBox.Resources>
                     </ListBox>
 
-                    <Grid Grid.Row="4" Margin="3" x:Name="PropertyEditor" 
+                    <Grid Grid.Row="4" x:Name="PropertyEditor" 
                           DataContext="{Binding ElementName=GearList, Path=SelectedItem.Tag}">
                         <Grid.Style>
                             <Style TargetType="Grid">
@@ -89,7 +95,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="5"/>
-                            <ColumnDefinition Width="Auto" MinWidth="50"/>
+                            <ColumnDefinition Width="*" MinWidth="50"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -101,8 +107,14 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Label Grid.Row="0" Grid.ColumnSpan="3" Content="{Binding Title}"/>
+                        <DockPanel Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource WindowTitleColorBrush}">
+                            <Button DockPanel.Dock="Right" Click="DeleteGear" ToolTip="Delete" Style="{StaticResource NoChromeButton}" Margin="0,0,3,0">
+                                <iconPacks:PackIconMaterial Kind="DeleteCircle" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Button>
 
+                            <Label Content="{Binding Title}" Foreground="{StaticResource WhiteBrush}"/>
+                        </DockPanel>
+                        
                         <Label Grid.Row="2" Content="Number of Teeth"/>
                         <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NumberOfTeeth, Mode=TwoWay}"/>
 

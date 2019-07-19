@@ -34,7 +34,7 @@ namespace GearGenerator.Views
                 NumberOfTeeth = numberOfTeeth,
                 PitchDiameter = pitchDiameter,
                 PressureAngle = pressureAngle,
-                Fill = Brushes.Silver,
+                Fill = new LinearGradientBrush(Colors.LightGray, Colors.DimGray, new Point(0,0), new Point(1,0)),
                 GuidelineColor = Brushes.DimGray,
             };
 
@@ -63,8 +63,8 @@ namespace GearGenerator.Views
             _gears.Add(control);
 
             var item = new ListBoxItem {Content = control.Title, Tag = control};
-
-            GearList.Items.Add(item);
+            var index = GearList.Items.Add(item);
+            GearList.SelectedIndex = index;
             ZoomCanvas.Children.Add(control);
         }
 
@@ -99,6 +99,15 @@ namespace GearGenerator.Views
         private void AddGear(object sender, EventArgs e)
         {
             AddGear(8, 200, 27);
+        }
+
+        private void DeleteGear(object sender, RoutedEventArgs e)
+        {
+            var item = GearList.SelectedItem as ListBoxItem;
+            var control = item?.Tag as GearControl;
+            _gears.Remove(control);
+            GearList.Items.Remove(item);
+            ZoomCanvas.Children.Remove(control);
         }
 
         private void Animate_Checked(object sender, RoutedEventArgs e)
