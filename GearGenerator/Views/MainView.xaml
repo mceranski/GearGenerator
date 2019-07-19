@@ -125,27 +125,32 @@
                         <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding PressureAngle, Mode=TwoWay}"/>
                     </Grid>
 
-                    <Grid Grid.Row="6">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                    <UniformGrid Rows="4" Grid.Row="6">
+                        <UniformGrid.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="3,0,3,3"/>
+                            </Style>
+                            <Style TargetType="CheckBox">
+                                <Setter Property="Margin" Value="0,0,3,0"/>
+                            </Style>
+                        </UniformGrid.Resources>
 
-                        <CheckBox Grid.Row="0" Click="ShowGrid_Checked" x:Name="ShowGridCheckbox">
+                        <CheckBox Click="ShowGrid_Checked" x:Name="ShowGridCheckbox">
                             <TextBlock Text="Show Grid"/>
                         </CheckBox>
 
-                        <CheckBox Grid.Row="2" Click="Guidelines_Checked" x:Name="GuidelinesCheckbox">
+                        <CheckBox Click="Guidelines_Checked" x:Name="GuidelinesCheckbox">
                             <TextBlock Text="Show Guidelines"/>
                         </CheckBox>
 
-                        <CheckBox Grid.Row="4" Click="Animate_Checked" x:Name="AnimateCheckbox">
+                        <CheckBox Click="TextOverlays_Checked" x:Name="TextOverlaysCheckbox">
+                            <TextBlock Text="Show Text Overlays"/>
+                        </CheckBox>
+
+                        <CheckBox Click="Animate_Checked" x:Name="AnimateCheckbox">
                             <TextBlock Text="Animate"/>
                         </CheckBox>
-                    </Grid>
+                    </UniformGrid>
             </Grid>
             </Border>
 

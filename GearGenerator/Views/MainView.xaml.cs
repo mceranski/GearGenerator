@@ -24,6 +24,7 @@ namespace GearGenerator.Views
             AnimateCheckbox.IsChecked = false;
             GuidelinesCheckbox.IsChecked = true;
             ShowGridCheckbox.IsChecked = true;
+            TextOverlaysCheckbox.IsChecked = true;
 
             AddGear(8, 200, 27, new Point(150,150));
             AddGear(16, 400, 27, new Point(375,355));
@@ -100,6 +101,11 @@ namespace GearGenerator.Views
         private void Guidelines_Checked(object sender, RoutedEventArgs e)
         {
             Apply(x => x.ShowGuidelines = GuidelinesCheckbox.IsChecked == true);
+        }
+
+        private void TextOverlays_Checked(object sender, RoutedEventArgs e)
+        {
+            Apply(x => x.ShowTextOverlay = TextOverlaysCheckbox.IsChecked == true);
         }
 
         private void ShowGrid_Checked(object sender, RoutedEventArgs e)

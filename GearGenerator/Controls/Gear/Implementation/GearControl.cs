@@ -128,7 +128,7 @@ namespace GearGenerator.Controls
 
             ShowTextOverlayProperty = DependencyProperty.Register(nameof(ShowTextOverlay), typeof(bool), typeof(GearControl),
                 new FrameworkPropertyMetadata(
-                    false,
+                    true,
                     FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     (o, args) => ((GearControl)o).ShowTextOverlay = (bool)args.NewValue));
         }
@@ -272,7 +272,7 @@ namespace GearGenerator.Controls
         public bool ShowTextOverlay
         {
             get => (bool)GetValue(ShowTextOverlayProperty);
-            set => SetValue(ShowTextOverlayProperty, value);
+            set => SetValueEx(ShowTextOverlayProperty, value);
         }
 
         public static void SetStroke(DependencyObject target, Stroke value) => target.SetValue(StrokeProperty, value);
@@ -341,7 +341,7 @@ namespace GearGenerator.Controls
 
             var gear = GetGear();
 
-            var guidelineVisibility = ShowGuidelines ? Visibility.Visible : Visibility.Collapsed;
+            var guidelineVisibility = BoolToVisibility(ShowGuidelines);
             _gearPath.ToolTip = gear.ToString();
             _gearPath.Data = GetGearGeometry(gear);
 
@@ -384,10 +384,15 @@ namespace GearGenerator.Controls
 
             
             _textOverlay.Text = OverlayText;
+            _textOverlay.Visibility = BoolToVisibility(ShowTextOverlay);
             var textRadius = gear.PitchRadius * .5;
             var figure = new PathFigure {StartPoint = new Point(CenterPoint.X - textRadius, CenterPoint.Y )};
             figure.Segments.Add( new ArcSegment{ IsLargeArc = false, Point = new Point( CenterPoint.X + textRadius, CenterPoint.Y), Size = new Size(textRadius, textRadius), SweepDirection = SweepDirection.Clockwise });
             _textOverlay.PathFigure = figure;
+        }
+
+        private static Visibility BoolToVisibility(bool value) {
+            return value ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public string OverlayText => $"#{Number} N={NumberOfTeeth} P={PitchDiameter} PA={PressureAngle}";
