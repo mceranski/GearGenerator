@@ -144,7 +144,7 @@ namespace GearGenerator
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occurred while trying to print.");
+                    MessageBox.Show( $"An error occurred while trying to print. {e.Message}");
                 }
 
                 //Drops visual size adjustments.

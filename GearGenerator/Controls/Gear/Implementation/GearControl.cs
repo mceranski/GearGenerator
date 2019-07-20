@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,16 +10,22 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using GearGenerator.Models;
 
-enum AnimationState
-{
-    Stopped = 0,
-    Running = 1,
-    Paused = 2
-}
-
 namespace GearGenerator.Controls
 {
     [TemplatePart(Name = "PART_Gear", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_PitchCircle", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_RootCircle", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_BaseCircle", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_OutsideCircle", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_BoreCircle", Type = typeof(Path))]
+    [TemplatePart(Name = "PART_PitchGeometry", Type = typeof(EllipseGeometry))]
+    [TemplatePart(Name = "PART_RootGeometry", Type = typeof(EllipseGeometry))]
+    [TemplatePart(Name = "PART_BaseGeometry", Type = typeof(EllipseGeometry))]
+    [TemplatePart(Name = "PART_OutsideGeometry", Type = typeof(EllipseGeometry))]
+    [TemplatePart(Name = "PART_BoreGeometry", Type = typeof(EllipseGeometry))]
+    [TemplatePart(Name = "PART_HorizontalLineGeometry", Type = typeof(LineGeometry))]
+    [TemplatePart(Name = "PART_VerticalLineGeometry", Type = typeof(LineGeometry))]
+    [TemplatePart(Name = "PART_TextOverlay", Type = typeof(TextOnPathElement))]
     public class GearControl : UserControl
     {
         public static readonly DependencyProperty NumberOfTeethProperty;
@@ -39,7 +44,6 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty NumberProperty;
         public static readonly DependencyProperty RevolutionsPerMinuteProperty;
 
-        private List<Tooth> Teeth { get; } = new List<Tooth>();
         private Storyboard _storyboard;
         private RotateTransform _rotateTransform;
         private DoubleAnimation _doubleAnimation;
@@ -179,7 +183,7 @@ namespace GearGenerator.Controls
             };
         }
 
-        public static Boolean IsMovementBigEnough(Point initialMousePosition, Point currentPosition)
+        public static bool IsMovementBigEnough(Point initialMousePosition, Point currentPosition)
         {
             return (Math.Abs(currentPosition.X - initialMousePosition.X) >= SystemParameters.MinimumHorizontalDragDistance ||
                     Math.Abs(currentPosition.Y - initialMousePosition.Y) >= SystemParameters.MinimumVerticalDragDistance);
@@ -308,17 +312,11 @@ namespace GearGenerator.Controls
             {
                 SetValueEx(RevolutionsPerMinuteProperty, value);
 
-
-                if ( _storyboard != null)
-                {
-                    _storyboard.SpeedRatio = RevolutionsPerMinute;
-
-                    if (_storyboard.GetCurrentState(this) != ClockState.Stopped)
-                    {
-                        _storyboard.Stop(this);
-                        _storyboard.Begin(this, true);
-                    }
-                }
+                if (_storyboard == null) return;
+                _storyboard.SpeedRatio = RevolutionsPerMinute;
+                if (_storyboard.GetCurrentState(this) == ClockState.Stopped) return;
+                _storyboard.Stop(this);
+                _storyboard.Begin(this, true);
             }
         }
 
@@ -363,8 +361,7 @@ namespace GearGenerator.Controls
 
         private Geometry GetGearGeometry(Gear gear)
         {
-            Teeth.Clear();
-
+            var teeth = new List<Tooth>();
 
             var toothGeometry = new StreamGeometry();
             using (var gc = toothGeometry.Open())
@@ -378,11 +375,11 @@ namespace GearGenerator.Controls
                         gc.BeginFigure(tooth.MirrorPoints.First(), true, false);
 
                     //connect the tooth to the previous tooth
-                    var lastTooth = Teeth.LastOrDefault();
+                    var lastTooth = teeth.LastOrDefault();
                     if (lastTooth != null)
                         gc.ArcTo(lastTooth.PrimaryPoints.Last(), new Size(gear.RootRadius, gear.RootRadius), 0, false, SweepDirection.Clockwise, true, true);
 
-                    Teeth.Add(tooth);
+                    teeth.Add(tooth);
                     gc.PolyLineTo(tooth.MirrorPoints, true, true);
                     gc.LineTo(tooth.PrimaryPoints.First(), true, true);
                     gc.PolyLineTo(tooth.PrimaryPoints, true, true);
@@ -390,7 +387,7 @@ namespace GearGenerator.Controls
                 }
 
                 //connect the last tooth
-                gc.ArcTo(Teeth.First().MirrorPoints.First(), new Size(gear.RootRadius, gear.RootRadius), 0, false, SweepDirection.Clockwise, true, true);
+                gc.ArcTo(teeth.First().MirrorPoints.First(), new Size(gear.RootRadius, gear.RootRadius), 0, false, SweepDirection.Clockwise, true, true);
             }
 
             return toothGeometry;
@@ -398,6 +395,15 @@ namespace GearGenerator.Controls
 
         public void Draw()
         {
+            void UpdateGeo(EllipseGeometry geo, double radius)
+            {
+                geo.Center = CenterPoint;
+                geo.RadiusX = radius;
+                geo.RadiusY = radius;
+            }
+
+            Visibility BoolToVisibility(bool value) => value ? Visibility.Visible : Visibility.Collapsed;
+
             if (_gearPath == null) return;
 
             var gear = GetGear();
@@ -406,33 +412,23 @@ namespace GearGenerator.Controls
             _gearPath.ToolTip = gear.ToString();
             _gearPath.Data = GetGearGeometry(gear);
 
-            _pitchGeometry.Center = CenterPoint;
-            _pitchGeometry.RadiusX = gear.PitchRadius;
-            _pitchGeometry.RadiusY = gear.PitchRadius;
+            UpdateGeo(_pitchGeometry, gear.PitchRadius);
             _pitchCircle.ToolTip = $"Pitch radius {gear.PitchRadius}";
             _pitchCircle.Visibility = guidelineVisibility;
 
-            _rootGeometry.Center = CenterPoint;
-            _rootGeometry.RadiusX = gear.RootRadius;
-            _rootGeometry.RadiusY = gear.RootRadius;
+            UpdateGeo(_rootGeometry, gear.RootRadius);
             _rootCircle.ToolTip = $"Root radius {gear.RootRadius}";
             _rootCircle.Visibility = guidelineVisibility;
 
-            _baseGeometry.Center = CenterPoint;
-            _baseGeometry.RadiusX = gear.BaseRadius;
-            _baseGeometry.RadiusY = gear.BaseRadius;
+            UpdateGeo(_baseGeometry, gear.BaseRadius);
             _baseCircle.ToolTip = $"Base radius {gear.BaseRadius}";
             _baseCircle.Visibility = guidelineVisibility;
 
-            _outsideGeometry.Center = CenterPoint;
-            _outsideGeometry.RadiusX = gear.OutsideRadius;
-            _outsideGeometry.RadiusY = gear.OutsideRadius;
+            UpdateGeo(_outsideGeometry, gear.OutsideRadius);
             _outsideCircle.ToolTip = $"Outside radius {gear.OutsideRadius}";
             _outsideCircle.Visibility = guidelineVisibility;
 
-            _boreGeometry.Center = CenterPoint;
-            _boreGeometry.RadiusX = gear.BoreRadius;
-            _boreGeometry.RadiusY = gear.BoreRadius;
+            UpdateGeo(_boreGeometry, gear.BoreRadius);
             _boreCircle.ToolTip = $"Bore radius {gear.BoreRadius}";
             _boreCircle.Visibility = guidelineVisibility;
 
@@ -449,10 +445,6 @@ namespace GearGenerator.Controls
             var figure = new PathFigure {StartPoint = new Point(CenterPoint.X - textRadius, CenterPoint.Y )};
             figure.Segments.Add( new ArcSegment{ IsLargeArc = false, Point = new Point( CenterPoint.X + textRadius, CenterPoint.Y), Size = new Size(textRadius, textRadius), SweepDirection = SweepDirection.Clockwise });
             _textOverlay.PathFigure = figure;
-        }
-
-        private static Visibility BoolToVisibility(bool value) {
-            return value ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public string OverlayText => $"#{Number} N={NumberOfTeeth} P={PitchDiameter} PA={PressureAngle}";

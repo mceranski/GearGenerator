@@ -24,7 +24,7 @@ namespace GearGenerator.Views
             TextOverlaysCheckbox.IsChecked = true;
 
             var smallGear = AddGear(8, 200, 27, new Point(150,150));
-            smallGear.RevolutionsPerMinute = 60;
+            smallGear.RevolutionsPerMinute = 6;
 
             var largeGear = AddGear(16, 400, 27, new Point(375,356));
             largeGear.RevolutionsPerMinute = 3;
