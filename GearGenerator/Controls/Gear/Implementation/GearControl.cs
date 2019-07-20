@@ -11,6 +11,13 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using GearGenerator.Models;
 
+enum AnimationState
+{
+    Stopped = 0,
+    Running = 1,
+    Paused = 2
+}
+
 namespace GearGenerator.Controls
 {
     [TemplatePart(Name = "PART_Gear", Type = typeof(Path))]
@@ -32,8 +39,6 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty NumberProperty;
         public static readonly DependencyProperty RevolutionsPerMinuteProperty;
 
-        private RotateTransform _renderTransform;
-        private string _animationState = "Stopped";
         private List<Tooth> Teeth { get; } = new List<Tooth>();
 
         private Path _gearPath;
@@ -210,28 +215,36 @@ namespace GearGenerator.Controls
             _verticalLineGeometry = GetTemplateChild("PART_VerticalLineGeometry") as LineGeometry;
 
             _textOverlay = GetTemplateChild("PART_TextOverlay") as TextOnPathElement;
+            
+            Draw();
+        }
 
-            var speedFactor = 60d / RevolutionsPerMinute;
-            var storyboard = new Storyboard
-            {
-                Duration = TimeSpan.FromSeconds(speedFactor),
-                RepeatBehavior = RepeatBehavior.Forever
+        private Storyboard CreateStoryboard()
+        {
+            //1 RPM
+            var duration = TimeSpan.FromSeconds(60d);
+
+            var storyboard = new Storyboard {
+                Duration = duration,
+                RepeatBehavior = RepeatBehavior.Forever,
+                SpeedRatio = RevolutionsPerMinute
             };
+            
+            var rotateAnimation = SweepDirection == SweepDirection.Clockwise
+                ? new DoubleAnimation(0, 360, duration)
+                : new DoubleAnimation(360, 0, duration);
 
-            var rotateAnimation = SweepDirection == SweepDirection.Clockwise 
-                ? new DoubleAnimation(0, 360, storyboard.Duration) 
-                : new DoubleAnimation(360, 0, storyboard.Duration);
+            rotateAnimation.RepeatBehavior = RepeatBehavior.Forever;
+            var rotateTransform = new RotateTransform(Angle) {CenterX = CenterPoint.X, CenterY = CenterPoint.Y};
 
-            rotateAnimation.RepeatBehavior = storyboard.RepeatBehavior;
-            _renderTransform = new RotateTransform(Angle);
-
-            _gearPath.SetValue(RenderTransformProperty, _renderTransform);
+            _gearPath.SetValue(RenderTransformProperty, rotateTransform);
             Storyboard.SetTarget(rotateAnimation, _gearPath);
             Storyboard.SetTargetProperty(rotateAnimation, new PropertyPath("(UIElement.RenderTransform).(RotateTransform.Angle)"));
             storyboard.Children.Add(rotateAnimation);
-            Resources.Add("Storyboard", storyboard);
 
-            Draw();
+            if (AutoStart) storyboard.Begin(this, true);
+
+            return storyboard;
         }
 
         public int NumberOfTeeth
@@ -279,7 +292,18 @@ namespace GearGenerator.Controls
         public double RevolutionsPerMinute
         {
             get => (double)GetValue(RevolutionsPerMinuteProperty);
-            set => SetValueEx(RevolutionsPerMinuteProperty, value);
+            set
+            {
+                SetValueEx(RevolutionsPerMinuteProperty, value);
+
+                if (!Resources.Contains("Storyboard")) return;
+                var storyboard = FindStoryBoard();
+                if (storyboard.GetCurrentState(this) != ClockState.Stopped)
+                {
+                    storyboard.Stop(this);
+                    storyboard.Begin(this, true);
+                }
+            }
         }
 
         public bool ShowGuidelines
@@ -360,10 +384,6 @@ namespace GearGenerator.Controls
         {
             if (_gearPath == null) return;
 
-            _renderTransform.CenterX = CenterPoint.X;
-            _renderTransform.CenterY = CenterPoint.Y;
-            _renderTransform.Angle = Angle;
-
             var gear = GetGear();
 
             var guidelineVisibility = BoolToVisibility(ShowGuidelines);
@@ -407,13 +427,15 @@ namespace GearGenerator.Controls
             _crosshairsPath.ToolTip = $"X: {CenterPoint.X} Y: {CenterPoint.Y}";
             _crosshairsPath.Visibility = guidelineVisibility;
 
-            
             _textOverlay.Text = OverlayText;
             _textOverlay.Visibility = BoolToVisibility(ShowTextOverlay);
             var textRadius = gear.PitchRadius * .5;
             var figure = new PathFigure {StartPoint = new Point(CenterPoint.X - textRadius, CenterPoint.Y )};
             figure.Segments.Add( new ArcSegment{ IsLargeArc = false, Point = new Point( CenterPoint.X + textRadius, CenterPoint.Y), Size = new Size(textRadius, textRadius), SweepDirection = SweepDirection.Clockwise });
             _textOverlay.PathFigure = figure;
+
+            var storyboard = FindStoryBoard();
+            storyboard.SpeedRatio = RevolutionsPerMinute;
         }
 
         private static Visibility BoolToVisibility(bool value) {
@@ -423,44 +445,39 @@ namespace GearGenerator.Controls
         public string OverlayText => $"#{Number} N={NumberOfTeeth} P={PitchDiameter} PA={PressureAngle}";
         public string Title => $"Gear #{Number}";
 
-        private Size MeasureString(TextBlock textBlock, string candidate)
+        private Storyboard FindStoryBoard()
         {
-            var formattedText = new FormattedText(
-                candidate,
-                CultureInfo.CurrentCulture,
-                FlowDirection.LeftToRight,
-                new Typeface(textBlock.FontFamily, textBlock.FontStyle, textBlock.FontWeight, textBlock.FontStretch),
-                textBlock.FontSize,
-                Brushes.Black,
-                new NumberSubstitution(),
-                TextFormattingMode.Display);
+            if (!Resources.Contains("Storyboard"))
+            {
+                var storyboard = CreateStoryboard();
+                Resources.Add("Storyboard", storyboard);
+            }
 
-            return new Size(formattedText.Width, formattedText.Height);
+            return FindResource("Storyboard") as Storyboard;
+
         }
-
-        private Storyboard MyStoryboard => (Storyboard) Resources["Storyboard"];
-
         public void Start()
         {
-            if (_animationState == "Stopped")
-            {
-
-                MyStoryboard.Begin(this, true);
-                _animationState = "Running";
-            }
-
-            if (_animationState == "Paused")
-            {
-                MyStoryboard.Resume(this);
-                _animationState = "Running";
-            }
+            var storyboard = FindStoryBoard();
+            storyboard.Begin(this, true );
         }
 
-        public void Stop()
+        public void Stop( bool force = false )
         {
-            if (_animationState != "Running") return;
-            MyStoryboard.Pause(this);
-            _animationState = "Paused";
+            var storyboard = FindStoryBoard();
+
+            if (force)
+            {
+                storyboard.Stop(this);
+                return;
+            }
+
+            var paused = storyboard.GetIsPaused(this);
+
+            if (paused) return;
+
+            if( storyboard.GetCurrentState(this) != ClockState.Stopped )
+                storyboard.Pause(this);
         }
 
         /// <summary>
