@@ -45,6 +45,7 @@ namespace GearGenerator.Controls
         public static readonly DependencyProperty RevolutionsPerMinuteProperty;
 
         private Storyboard _storyboard;
+        private AnimationState _animationState = AnimationState.Uninitialized;
         private RotateTransform _rotateTransform;
         private DoubleAnimation _doubleAnimation;
 
@@ -253,7 +254,7 @@ namespace GearGenerator.Controls
             _storyboard.Children.Add(_doubleAnimation);
 
             Resources.Add("Storyboard", _storyboard);
-            if (AutoStart) _storyboard.Begin(this, true);
+            if (AutoStart) Start();
         }
 
         public int NumberOfTeeth
@@ -314,9 +315,11 @@ namespace GearGenerator.Controls
 
                 if (_storyboard == null) return;
                 _storyboard.SpeedRatio = RevolutionsPerMinute;
-                if (_storyboard.GetCurrentState(this) == ClockState.Stopped) return;
-                _storyboard.Stop(this);
-                _storyboard.Begin(this, true);
+
+                var state = _animationState;
+                Stop(true);
+                if (state == AnimationState.Running)
+                    Start();
             }
         }
 
@@ -452,25 +455,18 @@ namespace GearGenerator.Controls
 
         public void Start()
         {
-            _storyboard?.Begin(this, true );
+            if (_animationState == AnimationState.Running) return;
+
+            _storyboard?.Begin(this, true);
+            _animationState = AnimationState.Running;
         }
 
         public void Stop( bool force = false )
         {
             if (_storyboard == null) return;
 
-            if (force)
-            {
-                _storyboard.Stop(this);
-                return;
-            }
-
-            var paused = _storyboard.GetIsPaused(this);
-
-            if (paused) return;
-
-            if( _storyboard.GetCurrentState(this) != ClockState.Stopped )
-                _storyboard.Pause(this);
+            _storyboard.Stop(this);
+            _animationState = AnimationState.Stopped;
         }
 
         /// <summary>
